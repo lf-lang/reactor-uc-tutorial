@@ -94,6 +94,21 @@ nix develop
 This creates a new shell in which the cross-compiler is available.
 **IMPORTANT**: Don't forget to run ``nix develop`` again when you return to your project in a new shell.
 
+#### MacOS
+
+On Mac, you need to install the full toolchain for  `arm-none-eabi-gcc` using the following HomeBrew command.
+
+```bash
+brew install --cask gcc-arm-embedded
+```
+
+**IMPORTANT** You should not install the arm-none-eabi-gcc formula. If you accidentally did this, you can uninstall the formula and install the full toolchain like this:
+
+```bash
+brew uninstall arm-none-eabi-gcc
+brew install --cask gcc-arm-embedded
+```
+
 ## 2. Start Using this Repository
 
 The RIOT OS sources are provided as a submodule of the new repository, to fetch them do:
@@ -166,7 +181,7 @@ This will display any output your program generates using, for example, `printf`
 You can also get debug output from the `reactor-uc` runtime by changing the following line in the `Makefile`:
 
 ```
-CFLAGS += -DLF_LOG_LEVEL_ALL=LF_LOG_LEVEL_ERR
+CFLAGS += -DLF_LOG_LEVEL_ALL=LF_LOG_LEVEL_ERROR
 ```
 
 to

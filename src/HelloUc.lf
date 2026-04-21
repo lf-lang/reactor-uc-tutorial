@@ -1,9 +1,9 @@
 target uC
 
-import Led from "./Led.lf"
+import LedController from "./LedController.lf"
 
 main reactor {
-  led = new Led();
+  led = new LedController();
   
   timer t(10msec, 500msec)
     

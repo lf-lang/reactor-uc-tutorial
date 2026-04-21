@@ -4,7 +4,7 @@ preamble {=
   #include "led.h"
 =}
 
-reactor Led {
+reactor LedController {
   input toggle: int;
   input set_state: bool;
 

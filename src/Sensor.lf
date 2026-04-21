@@ -1,6 +1,6 @@
 target uC
 
-import Led from "./Led.lf"
+import LedController from "./LedController.lf"
 import LSM6DS33 from "./LSM6DS33.lf"
 
 preamble {=
@@ -9,7 +9,7 @@ preamble {=
 =}
 
 main reactor {
-  led = new Led();
+  led = new LedController();
   lsm6ds33 = new LSM6DS33();
   
   logical action blink: int;

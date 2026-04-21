@@ -1,0 +1,149 @@
+target uC
+
+preamble {=
+struct Vector {
+  float x;
+  float y;
+  float z;
+};
+
+typedef struct Vector Vector;
+
+#include "periph/i2c.h"
+
+/* I2C Configuration */
+#define I2C_BUS         I2C_DEV(0)      // Usually I2C_DEV(0) in RIOT
+#define SENSOR_ADDR     0x6A            // SA0 pulled to GND
+#define I2C_FLAG_NONE   0
+
+/* LSM6DS33 Register Map */
+#define WHO_AM_I        0x0F
+#define CTRL1_XL        0x10
+#define CTRL2_G         0x11
+#define CTRL3_C         0x12
+#define OUTX_L_G        0x22            // Gyro starts here
+#define OUTX_L_XL       0x28            // Accel starts here
+
+#define GYRO_OUTX_L         0x22    // Starting register for Gyro data
+#define GYRO_SENSITIVITY    6.75f   // mdps/LSB for +/- 245 dps range
+#define DT                  0.0048f // 1 / 208Hz ODR = 0.0048 seconds
+#define CALIBRATION_SAMPLES 200
+=}
+
+reactor LSM6DS33 {
+  //output acceleration: Vector
+  output orientation: Vector
+  timer t(50msec, 48msec);
+
+  state angle_x: float;
+  state angle_y: float;
+  state angle_z: float;
+
+  state angle_x_biat: float;
+  state angle_y_biat: float;
+  state angle_z_biat: float;
+
+  state counter: int;
+
+  reaction(startup) {=
+    printf("initializing sensor\n");
+    uint8_t whoami;
+
+    self->angle_x = 0.0f;
+    self->angle_y = 0.0f;
+    self->angle_z = 0.0f;
+
+    // 1. Acquire the bus
+    i2c_acquire(I2C_BUS);
+
+    // 2. Verify connection (WHO_AM_I)
+    if (i2c_read_reg(I2C_BUS, SENSOR_ADDR, WHO_AM_I, &whoami, I2C_FLAG_NONE) < 0) {
+        i2c_release(I2C_BUS);
+        printf("failure releasing i2c\n");
+        return;
+    }
+    if (whoami != 0x69) {
+        i2c_release(I2C_BUS);
+        printf("failure wrong device\n");
+        return; // Wrong device
+    }
+
+    // 3. Software Reset
+    i2c_write_reg(I2C_BUS, SENSOR_ADDR, CTRL3_C, 0x05, I2C_FLAG_NONE);
+    
+    // 4. Configure Accel (208 Hz, +/- 2g)
+    i2c_write_reg(I2C_BUS, SENSOR_ADDR, CTRL1_XL, 0x40, I2C_FLAG_NONE);
+
+    // 5. Configure Gyro (208 Hz, 245 dps)
+    i2c_write_reg(I2C_BUS, SENSOR_ADDR, CTRL2_G, 0x50, I2C_FLAG_NONE);
+
+    // 6. Enable Block Data Update and Auto-increment (IF_INC)
+    i2c_write_reg(I2C_BUS, SENSOR_ADDR, CTRL3_C, 0x44, I2C_FLAG_NONE);
+
+    i2c_release(I2C_BUS);
+
+    printf("successfull sensor initialization\n");
+  =}
+
+  reaction(t) -> orientation {=
+    printf("reading gyro data\n");
+    uint8_t buf[6];
+    int16_t raw_x, raw_y, raw_z;
+
+    i2c_acquire(I2C_BUS);
+    // Read 6 bytes: XL, XH, YL, YH, ZL, ZH
+    if (i2c_read_regs(I2C_BUS, SENSOR_ADDR, GYRO_OUTX_L, buf, 6, 0) < 0) {
+        i2c_release(I2C_BUS);
+        printf("failed to read gyro data\n");
+        return;
+    }
+    i2c_release(I2C_BUS);
+
+    // Reconstruct 16-bit signed integers (Little Endian)
+    raw_x = (int16_t)(buf[0] | (buf[1] << 8));
+    raw_y = (int16_t)(buf[2] | (buf[3] << 8));
+    raw_z = (int16_t)(buf[4] | (buf[5] << 8));
+
+    // Convert raw to Degrees Per Second (dps)
+    // (raw * 8.75) / 1000 converts millidegrees to degrees
+    float gx = (((float)raw_x) * GYRO_SENSITIVITY) / 1000.0f;
+    float gy = (((float)raw_y) * GYRO_SENSITIVITY) / 1000.0f;
+    float gz = (((float)raw_z) * GYRO_SENSITIVITY) / 1000.0f;
+
+    if (self->counter < CALIBRATION_SAMPLES) {
+      self->angle_x_biat += gx;
+      self->angle_y_biat += gy;
+      self->angle_z_biat += gz;
+      self->counter++;
+      return;
+    } else if (self->counter == CALIBRATION_SAMPLES) {
+      self->angle_x_biat /= CALIBRATION_SAMPLES;
+      self->angle_y_biat /= CALIBRATION_SAMPLES;
+      self->angle_z_biat /= CALIBRATION_SAMPLES;
+      self->counter++; // Increment to avoid re-calibration
+      printf("calibration complete: %.6f, %.6f, %.6f\n", self->angle_x_biat, self->angle_y_biat, self->angle_z_biat);
+      return;
+    } else {
+      // Subtract bias from raw gyro readings
+      gx -= self->angle_x_biat;
+      gy -= self->angle_y_biat;
+      gz -= self->angle_z_biat;
+    }
+
+    // Numerical Integration: Angle = Angle + (Velocity * Time)
+    self->angle_x += gx * DT;
+    self->angle_y += gy * DT;
+    self->angle_z += gz * DT;
+
+    printf("diff: %.6f, %.6f, %.6f\n", gx * DT, gy * DT, gz * DT);
+    printf("total: %.6f, %.6f, %.6f\n", self->angle_x, self->angle_y, self->angle_z);
+
+    struct Vector vec;
+    vec.x = self->angle_x;
+    vec.y = self->angle_y;
+    vec.z = self->angle_z;
+    lf_set(orientation, vec);
+  =}
+}
+
+

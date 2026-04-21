@@ -1,0 +1,41 @@
+target uC
+
+import Led from "./Led.lf"
+import LSM6DS33 from "./LSM6DS33.lf"
+
+preamble {=
+  #define ORIENTATION_TO_TIME 12000.0f
+=}
+
+@timeout(10s)
+main reactor {
+  led = new Led();
+  lsm6ds33 = new LSM6DS33();
+  
+  logical action blink: int;
+  state blinking_speed: interval_t;
+
+  reaction(startup) -> led.set_state, blink {=
+    lf_set(led.set_state, true);
+    self->blinking_speed = SEC(10);
+    lf_schedule(blink, SEC(1), 0);
+  =}
+
+  reaction(lsm6ds33.orientation) {=
+    float total_angle_x = lsm6ds33.orientation->value.x;
+    printf("total angle x: %.6f\n", total_angle_x);
+    uint32_t time_speed_up = ((float)ORIENTATION_TO_TIME / ((float)total_angle_x + 12.0f));
+    printf("time delay: %i\n", time_speed_up);
+    self->blinking_speed = MSEC(time_speed_up);
+  =}
+
+  reaction (blink) -> led.toggle, blink {=
+    printf("blinking speed: " PRINTF_TAG, self->blinking_speed);
+    lf_set(led.toggle, 0);
+
+    if (self->blinking_speed == 0) {
+      self->blinking_speed = MSEC(10);
+    }
+    lf_schedule(blink, self->blinking_speed, 0);
+  =}
+}

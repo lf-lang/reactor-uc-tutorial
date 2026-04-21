@@ -1,16 +1,17 @@
-# reactor-uc RIOT-OS Template
+# reactor-uc unofficial DATE26 workshop
 
 ![RIOT OS Logo](https://www.riot-os.org/assets/img/riot-logo.png)
+![nrf-board](https://cdn-learn.adafruit.com/assets/assets/000/088/831/large1024/sensors_Feather_Sense_top.jpg?1583171226)
 
 - **Git:** <https://github.com/riot-os/RIOT>
 - **Supported Boards:** <https://www.riot-os.org/boards.html>
 - **Documentation:** <https://doc.riot-os.org/>
+- **Adafruit page:** <https://learn.adafruit.com/adafruit-feather-sense>
+- **RIOT docs for board:** <https://api.riot-os.org/group__boards__adafruit-feather-nrf52840-sense.html>
 
 ______
 
-This is a template for Lingua Franca applications targeting RIOT OS on embedded boards. It is currently configured to support ARM-based boards.
-
-If you have trouble, please refer to the platform-specific hints towards the end of these instructions.
+This is a tutorial for Lingua Franca applications running on RIOT OS with the [Adafruit Feather Sense](https://learn.adafruit.com/adafruit-feather-sense) board. 
 
 ## 1. Prerequisites
 
@@ -24,7 +25,7 @@ You must use one of the following operating systems:
 Your system must have the following software packages (you likely have at least some of these already):
 
 - `git` — [a distributed version control system](https://git-scm.com/)
-- `make` — Need at least version 4.0 for RIOT (see [macOS Hints](#macos-hints))
+- `make` — Version 4.0 or higher required for RIOT (see [macOS Hints](#macos-hints))
 - `java` — [Java 17](https://openjdk.org/projects/jdk/17)
 - Optional: `nix` — [a purely functional package manager](https://nix.dev/tutorials/install-nix)
 
@@ -44,7 +45,7 @@ curl -L https://nixos.org/nix/install | sh
 pip install pyserial
 ```
 
-Note that `make` will be installed as `gmake` (see [macOS Hints](#macos-hints)), so all commands below should use `gmake` instead of `make`.
+Note that on macOS, `make` will be installed as `gmake`, so use `gmake` instead of `make` in all commands below.
 
 ### 1.2. Micro C Target for Lingua Franca
 
@@ -93,11 +94,7 @@ nix develop
 This creates a new shell in which the cross-compiler is available.
 **IMPORTANT**: Don't forget to run ``nix develop`` again when you return to your project in a new shell.
 
-## 2. Create a Repository using this Repo as the Template
-
-On GitHub, [create a repository](https://docs.github.com/en/repositories/creating-and-managing-repositories/creating-a-repository-from-a-template) using [this template](https://github.com/lf-lang/lf-riot-uc-template).
-Then clone this repo onto your development machine.
-This will be your workspace for developing Lingua Franca programs.
+## 2. Start Using this Repository
 
 The RIOT OS sources are provided as a submodule of the new repository, to fetch them do:
 
@@ -107,53 +104,54 @@ git submodule update --init --recursive
 
 ## 3. Configure the Makefile
 
-Your new repository has a `Makefile` in the home directory that governs the build. It is set by default to compile a very simple LF program that you can find in `src/HelloWorld.lf`.  To compile a different LF program, edit the `Makefile` to point the `LF_MAIN` to your LF program and
-set the `BOARD` variable to specify your board.  By default, these are defined in the `Makefile` as follows:
+The repository has a `Makefile` that governs the build. By default, it compiles the LF program in `src/HelloUc.lf`. To compile a different program, edit the `Makefile` to set `LF_MAIN` to your program and `BOARD` to your board. 
 
 ```Makefile
-LF_MAIN ?= HelloWorld
-BOARD ?= native
-```
-
-Setting `BOARD` to `native` should result in an executable that runs in your development machine, **but only if it is a Linux machine** (on other platforms, the generated code will fail to compile).  To specify, for example, the ST `nucleo-f446re`, you would write:
-
-```Makefile
-BOARD ?= nucleo-f446re
+LF_MAIN ?= HelloUc
+BOARD ?= adafruit-feather-nrf52840-sense
 ```
 
 Alternatively, you can override the board on the command line. For example:
 
 ```sh
-make BOARD=nucleo-f446re all
+make LF_MAIN=HelloUc all
 ```
 
-See [boards supported by RIOT](https://www.riot-os.org/boards.html).
+## 4. LED Reactor
 
-## 4. Build
+Open `src/Led.lf` and implement a reactor for controlling the on-board LEDs.
+
+
+## 5. HelloUc Reactor
+
+In `HelloUc.lf`, use the LED reactor to toggle the LED at a fixed rate.
+
+
+## 6. Build
 
 ```bash
 make all
 ```
 
-or with parameters to override the `Makefile configuration
+Or override the Makefile configuration with parameters:
 
 ```bash
-make LF_MAIN=HelloWorld BOARD=nucleo-f446re all
+make LF_MAIN=HelloUc BOARD=adafruit-feather-nrf52840-sense all
 ```
 
-## 5. Flash the Program onto your Board
+## 7. Flash the Program onto Your Board
 
 ```bash
 make flash
 ```
 
-or with parameters to override the `Makefile configuration
+Or override the Makefile configuration with parameters:
 
 ```bash
-make LF_MAIN=HelloWorld BOARD=nucleo-f446re flash
+make LF_MAIN=HelloUc BOARD=adafruit-feather-nrf52840-sense flash
 ```
 
-## 6. Open a Terminal
+## 8. Open a Terminal
 
 You can open a terminal that interacts with stdin and stdout of your program as follows:
 
@@ -175,61 +173,111 @@ to
 CFLAGS += -DLF_LOG_LEVEL_ALL=LF_LOG_LEVEL_DEBUG
 ```
 
-## 7. VS Code Extensions
+## 9. Sensor Makefile Configuration
 
-To edit Lingua Franca programs, it is convenient to use the [Lingua Franca extension for Visual Studio Code](https://marketplace.visualstudio.com/items?itemName=lf-lang.vscode-lingua-franca).
-If you do not have [the Visual Studio Code IDE](https://code.visualstudio.com/download), you can install it using one of (for Linux and macOS, respectively):
+Add the following lines to your Makefile to enable I2C support in RIOT:
 
+```Makefile
+# so i2c and printf support for floats is compiled into the riot kernel
+USEMODULE += periph_i2c 
+USEMODULE += printf_float
 ```
-sudo snap install code --classic
-brew install --cask visual-studio-code
-```
 
-You may also benefit from the following extensions:
+## 10. Implementing the Sensor
 
-- `ms-vscode.cmake-tools` — [Extended CMake support in Visual Studio Code](https://marketplace.visualstudio.com/items?itemName=ms-vscode.cmake-tools)
-- `ms-vscode.cpptools` — [C/C++ IntelliSense, debugging, and code browsing](https://marketplace.visualstudio.com/items?itemName=ms-vscode.cpptools)
-- `marus25.cortex-debug` — [ARM Cortex-M GDB Debugger support for VSCode](https://marketplace.visualstudio.com/items?itemName=marus25.cortex-debug)
+The Adafruit Feather Sense includes many sensors. We'll focus on the [LSM6DS33](https://www.pololu.com/file/0J1087/LSM6DS33.pdf) accelerometer and gyro. See the [full sensor list](https://learn.adafruit.com/adafruit-feather-sense) for details.
 
-To install them from the command line, run:
+The file `LSM6DS33.lf` has a section for reading sensor values that you need to complete. Refer to the [RIOT I2C documentation](https://api.riot-os.org/group__drivers__periph__i2c.html) and read register `OUTX_L_G` (see the datasheet for details).
+
+To test your sensor implementation, compile and run `Sensor.lf` (which includes the sensor reactor). This command compiles, flashes, and opens the serial console:
+
 
 ```bash
-code --install-extension lf-lang.vscode-lingua-franca --pre-release
-code --install-extension ms-vscode.cmake-tools
-code --install-extension ms-vscode.cpptools
-code --install-extension marus25.cortex-debug
+make LF_MAIN=Sensor BOARD=adafruit-feather-nrf52840-sense all flash term
 ```
 
-## macOS Hints
 
-The tools require `make` to be at least version 4.0, and, as of this writing, standard macOS distributions have an older version.  Check:
+## 11. Using Sensor Values
 
-```
-$ make --version
-GNU Make 3.81
-...
-```
-
-You can install a more recent version:
+Make the LED blink faster or slower based on the device's orientation. When flat on a table (angle ≈ 0), use a 1-second LED toggle period. 
 
 ```
-brew install make
+OFFSET = 4 * PI ~ 12.566
+ORIENTATION_TO_TIME = 4 * PI * 1000 ~ 12566
+PERIOD = ORIENTATION_TO_TIME / (current_angle + OFFSET)
 ```
 
-Note that `make` will be installed as `gmake`, so all commands above should use `gmake` instead of `make`.
+This produces our `PERIOD` in milliseconds.
 
-## Linux Hints
+Flash the program and rotate the device around its longest axis to see the LED blink rate change.
 
-To use `nix` on Linux (or WSL), make sure that your user is a member of the `nix-users` group. To check this, run:
+## 12. Annotations
+
+reactor-uc supports many annotations; see the [full list](http://micro-lf.org/documentation/annotations/). In this scenario, we'll add a `timeout` and configure a buffer size for actions.
+
+- **Timeout:** add the `@timeout(<time_value>)` annotation to the main reactor.
+- **Action Buffer Size:** add the `@max_pending_event(<number>)` before the action declaration.
+
+Now recompile your program.
+
+You can validate if the code generator correctly adjusted the action buffer size by opening `src-gen/Sensor/Sensor/Sensor.h` file and searching for the `LF_DEFINE_ACTION_STRUCT` macro.
+
+The timeout property can be found inside the `src-gen/Sensor/lf_start.c` file inside the `DynamicScheduler_ctor`.
+
+
+
+## 13. Delayed Connections and the Buffer Annotation
+
+Before we go federated it is good to look into the `@buffer` annotation, which can be added to delayed connections to increase the associated buffer for storing the values. If you have a timer with a high frequency it is very easy to run out of space inside the connection.
+
+Compile the `src/DelayedConn.lf` program and see when it stops dropping values, by changing the `@buffer` annotation.
+
+## 14. The Link Local Address of the Device
+
+Add this temporarily to your Makefile
+
+```
+USEMODULE += gnrc_netif
+USEMODULE += gnrc_ipv6_default
+USEMODULE += ipv6_addr
+USEMODULE += netdev_default
+USEMODULE += gnrc_netif_ieee802154
+USEMODULE += gnrc_ipv6_default
+USEMODULE += auto_init_gnrc_netif
+USEMODULE += auto_init
+```
+
+Then compile and run the `src/Ipv6LinkLocal.lf` program this program will print the Ipv6 Link Local address of this board. Copy and Save this address.
+
+
+## 15. Going Federated
+
+We need to tell reactor-uc that we want the COAP network channel to be added to the compilation unit:
+
+```Makefile
+CFLAGS += -DNETWORK_CHANNEL_COAP_RIOT
+```
+
+The compilation command also changes because now we need to specify which federate to compile and flash:
 
 ```bash
-groups
+make LF_MAIN=SimpleCoapFederated LF_FED=r1 BOARD=adafruit-feather-nrf52840-sense all flash term
+
+make LF_MAIN=SimpleCoapFederated LF_FED=r2 BOARD=adafruit-feather-nrf52840-sense all flash term
 ```
 
-If `nix-users` is not listed, run:
+In reactor-uc you also configure the network channels by adding annotations.
 
-```bash
-sudo usermod -aG nix-users $USER
+```
+ @interface_coap(name="if1", address="<Paste Your Link Local Address Here>")
 ```
 
-Please note that you might need to reboot your system after running `usermod` in order for the new group membership to be reflected.
+Coordinate with your neighbor agree on which federate your board runs and exchange the Ipv6 link local addresses accordingly.
+
+
+This creates a CoAP network channel named `if1` with the specified IPv6 address. The `@link` annotation specifies which network channel interface to use for a connection.
+
+In the serial output you should now see the two federates communicating. 
+
+
+

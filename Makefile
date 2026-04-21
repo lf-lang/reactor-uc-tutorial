@@ -1,5 +1,9 @@
 # The name of the LF application inside "./src" to build/run/flash etc.
-LF_MAIN ?= HelloUc
+LF_MAIN ?= Sensor
+
+# so i2c and printf support for floats is compiled into the riot kernel
+USEMODULE += periph_i2c 
+USEMODULE += printf_float
 
 # Increase the default stack-size
 CFLAGS += -DTHREAD_STACKSIZE_MAIN=4096

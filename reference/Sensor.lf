@@ -25,9 +25,7 @@ main reactor {
   reaction(lsm6ds33.orientation) {=
     float total_angle_x = lsm6ds33.orientation->value.x;
     printf("total angle x: %.6f\n", total_angle_x);
-    uint32_t time_speed_up = (ORIENTATION_TO_TIME / (total_angle_x + OFFSET_ANGLE));
-    printf("time delay: %i\n", time_speed_up);
-    self->blinking_speed = MSEC(time_speed_up);
+    self->blinking_speed = MSEC((int)(total_angle_x + 10) * 100);
   =}
 
   reaction (blink) -> led.toggle, blink {=

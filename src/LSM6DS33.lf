@@ -89,13 +89,18 @@ reactor LSM6DS33 {
     uint8_t buf[6];
     int16_t raw_x, raw_y, raw_z;
 
-
     /*
       ========================= TODO ===========================
       Here check the RIOT manual and acquire the I2C bus, read the 
       6 gyro data bytes, and finally release the bus
     */
-
+    i2c_acquire(I2C_BUS);
+    if (i2c_read_regs(I2C_BUS, SENSOR_ADDR, GYRO_OUTX_L, buf, 6, I2C_FLAG_NONE) < 0) {
+      i2c_release(I2C_BUS);
+      printf("failed to read gyro data\n");
+      return;
+    }
+    i2c_release(I2C_BUS);
 
     // Reconstruct 16-bit signed integers (Little Endian)
     raw_x = (int16_t)(buf[0] | (buf[1] << 8));

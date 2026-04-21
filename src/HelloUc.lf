@@ -1,15 +1,13 @@
 target uC
 
-import Led from "./Led.lf"
+import LedController from "./LedController.lf"
 
 main reactor {
-  led = new Led();
+  led = new LedController();
   
   timer t(10msec, 500msec)
-    
-  /*
-    ========================= TODO ===========================
-    Here use the led.state_state to initialize the LED and the another 
-    reaction to toggle the LED every periodically.
-  */
+
+  reaction(t) -> led.toggle {=
+    lf_set(led.toggle, 0);
+  =}
 }

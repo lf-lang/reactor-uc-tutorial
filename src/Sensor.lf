@@ -1,6 +1,6 @@
 target uC
 
-import Led from "./Led.lf"
+import LedController from "./LedController.lf"
 import LSM6DS33 from "./LSM6DS33.lf"
 
 preamble {=
@@ -9,7 +9,7 @@ preamble {=
 =}
 
 main reactor {
-  led = new Led();
+  led = new LedController();
   lsm6ds33 = new LSM6DS33();
   
   logical action blink: int;
@@ -17,7 +17,7 @@ main reactor {
 
   reaction(startup) -> led.set_state, blink {=
     lf_set(led.set_state, true);
-    self->blinking_speed = SEC(10);
+    self->blinking_speed = SEC(3);
     lf_schedule(blink, SEC(1), 0);
   =}
 
@@ -28,7 +28,13 @@ main reactor {
    and OFFSET_ANGLE macros defined in the preamble to calculate the blinking speed. 
    Finally, set the blinking_speed state variable to the new value.
   */
-
+  reaction(lsm6ds33.orientation) {=
+    float total_angle_x = lsm6ds33.orientation->value.x;
+    printf("total angle x: %.6f\n", total_angle_x);
+    // float period = (4 * 3.14159f * 1000) / (total_angle_x + 4 * 3.1459f);
+    //printf("period: %.6f\n", period);
+    // self->blinking_speed = MSEC((int)period);
+  =}
 
   /* 
     ========================= TODO ===========================
@@ -37,4 +43,10 @@ main reactor {
     Optionally check if the blinking_speed is zero and set it to a default value 
     to avoid rescheduling with zero delay.
   */
+
+  reaction(blink) -> led.toggle, blink {=
+    printf("blinking speed: " PRINTF_TIME "\n", self->blinking_speed);
+    lf_set(led.toggle, 0);
+    lf_schedule(blink, self->blinking_speed, 0);
+  =}
 }

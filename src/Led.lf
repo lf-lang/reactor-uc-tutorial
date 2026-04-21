@@ -8,16 +8,10 @@ reactor Led {
   input toggle: int;
   input set_state: bool;
 
-  reaction (toggle) {=
-    LED0_TOGGLE;
-  =}
-
-  reaction (set_state) {=
-    if (set_state->value) {
-      LED0_ON;
-    } else {
-      LED0_OFF;
-    }
-  =}
+  /*
+    ========================= TODO ===========================
+    Implement the reactions to toggle and set_state. You can use the 
+    functions defined in led.h, e.g., LED0_TOGGLE, LED0_ON, LED0_OFF
+  */
 }
 

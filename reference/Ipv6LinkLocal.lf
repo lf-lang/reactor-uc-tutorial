@@ -1,0 +1,50 @@
+target uC;
+
+
+main reactor {
+
+preamble {=
+    #include <stdio.h>
+    #include "net/gnrc/netif.h"
+    #include "net/ipv6/addr.h"
+
+    void print_local_addresses(void)
+    {
+        /* Iterate over all registered network interfaces */
+        gnrc_netif_t *netif = gnrc_netif_iter(NULL);
+
+        printf("NetIf Pointer: %p\n", (void*)netif);
+
+        while (netif != NULL) {
+            /* Array to hold addresses for this interface */
+            ipv6_addr_t addrs[CONFIG_GNRC_NETIF_IPV6_ADDRS_NUMOF];
+            
+            /* Fill the array with the interface's IPv6 addresses */
+            int res = gnrc_netif_ipv6_addrs_get(netif, addrs, sizeof(addrs));
+            
+            if (res < 0) {
+                printf("Error retrieving addresses for interface %d\n", netif->pid);
+            } else {
+                /* Calculate how many addresses were actually returned */
+                size_t num_addrs = res / sizeof(ipv6_addr_t);
+                printf("Interface PID %d has %u address(es):\n", netif->pid, (unsigned)num_addrs);
+
+                for (size_t i = 0; i < num_addrs; i++) {
+                    char addr_str[IPV6_ADDR_MAX_STR_LEN];
+                    ipv6_addr_to_str(addr_str, &addrs[i], sizeof(addr_str));
+                    printf("  -> %s\n", addr_str);
+                }
+            }
+            /* Move to the next interface */
+            netif = gnrc_netif_iter(netif);
+        }
+    }
+=}
+    timer t(0s, 2s);
+
+  reaction(t) {=
+    print_local_addresses();
+  =}
+}
+
+

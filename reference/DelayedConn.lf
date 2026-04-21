@@ -22,9 +22,6 @@ main reactor {
     source = new HighFrequencySource();
     sink = new DataSink();
     
-    /*
-      ========================= TODO ===========================
-      Here an annotation is missing ;D
-    */
+    @buffer(5)
     source.out -> sink.in after 500msec; 
 }

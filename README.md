@@ -1,4 +1,4 @@
-# reactor-uc unofficial DATE26 workshop
+# reactor-uc unofficial DATE26 tutorial
 
 ![RIOT OS Logo](https://www.riot-os.org/assets/img/riot-logo.png)
 ![nrf-board](https://cdn-learn.adafruit.com/assets/assets/000/088/831/large1024/sensors_Feather_Sense_top.jpg?1583171226)
@@ -119,7 +119,9 @@ make LF_MAIN=HelloUc all
 
 ## 4. LED Reactor
 
-Open `src/Led.lf` and implement a reactor for controlling the on-board LEDs.
+Open `src/Led.lf` and implement a reactor for controlling the on-board LEDs. 
+You can find the reactor-uc reaction api [here](http://micro-lf.org/documentation/reaction_api/), you can read the value of a trigger with `port_name->value` and you 
+can set ports with `lf_set(port_name, <value>)`.
 
 
 ## 5. HelloUc Reactor
@@ -272,12 +274,21 @@ In reactor-uc you also configure the network channels by adding annotations.
  @interface_coap(name="if1", address="<Paste Your Link Local Address Here>")
 ```
 
-Coordinate with your neighbor agree on which federate your board runs and exchange the Ipv6 link local addresses accordingly.
-
+Coordinate with your neighbor agree on which federate your board runs and exchange the Ipv6 link local addresses accordingly. Also make sure your program have the same structure.
 
 This creates a CoAP network channel named `if1` with the specified IPv6 address. The `@link` annotation specifies which network channel interface to use for a connection.
 
 In the serial output you should now see the two federates communicating. 
 
+## 16. The Final Boss - Federated Blinking
+
+![The final boss](https://images-wixmp-ed30a86b8c4ca887773594c2.wixmp.com/f/8bcbac46-c322-4678-9738-e08774e90a1e/ddc4s1q-db698149-fd79-4460-b9f5-4bc49b11dc41.png/v1/fill/w_894,h_894/bowser_brawl_render_remake_by_unbecomingname_ddc4s1q-pre.png?token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ1cm46YXBwOjdlMGQxODg5ODIyNjQzNzNhNWYwZDQxNWVhMGQyNmUwIiwiaXNzIjoidXJuOmFwcDo3ZTBkMTg4OTgyMjY0MzczYTVmMGQ0MTVlYTBkMjZlMCIsIm9iaiI6W1t7ImhlaWdodCI6Ijw9MjAwMCIsInBhdGgiOiIvZi84YmNiYWM0Ni1jMzIyLTQ2NzgtOTczOC1lMDg3NzRlOTBhMWUvZGRjNHMxcS1kYjY5ODE0OS1mZDc5LTQ0NjAtYjlmNS00YmM0OWIxMWRjNDEucG5nIiwid2lkdGgiOiI8PTIwMDAifV1dLCJhdWQiOlsidXJuOnNlcnZpY2U6aW1hZ2Uub3BlcmF0aW9ucyJdfQ.YbH13sRdLsjM7thEWKlIS902vqHGgzwvP6UZ4EjfO2M)
+
+You made it to the final level.
+
+Open the the `src/FederatedBlinking.lf` file now we want to combine everything learned and
+here we want to let the local Blink faster if neighbors microcontroller is turned.
+
+The make sure all the necessary Modules are added inside your `Makefile` additionally make sure you flash the correct verion onto the correct board (otherwise the addresses dont match). 
 
 

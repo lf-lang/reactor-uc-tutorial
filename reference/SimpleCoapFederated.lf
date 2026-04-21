@@ -28,17 +28,12 @@ reactor Dst {
   =}
 }
 
-/*
-  ========================= TODO ===========================
-  Feel free to compile this program in DEBUG/INFO mode to see the connection process. 
-*/
-
 @platform("RIOT")
 federated reactor {
-  @interface_coap(name="if1", address="<your or your neighbors IPv6 LL address here>")
+  @interface_coap(name="if1", address="fe80::e4b1:841f:6c96:288b")
   r1 = new Src(id=42)
 
-  @interface_coap(name="if1", address="<your or your neighbors IPv6 LL address here>")
+  @interface_coap(name="if1", address="fe80::644e:6245:f989:c30b")
   r2 = new Dst()
 
   @link(left="if1", right="if1")

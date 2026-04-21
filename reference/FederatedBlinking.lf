@@ -47,10 +47,10 @@ reactor SensorNode(id: int = 0) {
 
 @platform("RIOT")
 federated reactor {
-  @interface_coap(name="if1", address="fe80::e4b1:841f:6c96:288b")
+  @interface_coap(name="if1", address="fe80::644e:6245:f989:c30b")
   r1 = new SensorNode()
 
-  @interface_coap(name="if1", address="fe80::644e:6245:f989:c30b")
+  @interface_coap(name="if1", address="fe80::e4b1:841f:6c96:288b")
   r2 = new SensorNode()
 
   @link(left="if1", right="if1")

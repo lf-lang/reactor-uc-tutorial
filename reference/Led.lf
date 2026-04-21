@@ -1,0 +1,23 @@
+target uC
+
+preamble {=
+  #include "led.h"
+=}
+
+reactor Led {
+  input toggle: int;
+  input set_state: bool;
+
+  reaction (toggle) {=
+    LED0_TOGGLE;
+  =}
+
+  reaction (set_state) {=
+    if (set_state->value) {
+      LED0_ON;
+    } else {
+      LED0_OFF;
+    }
+  =}
+}
+

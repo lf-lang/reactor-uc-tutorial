@@ -1,0 +1,17 @@
+target uC
+
+import Led from "./Led.lf"
+
+main reactor {
+  led = new Led();
+  
+  timer t(10msec, 500msec)
+    
+    reaction(startup) -> led.set_state {=
+      lf_set(led.set_state, true);
+    =}
+
+    reaction(t) -> led.toggle {=
+      lf_set(led.toggle, 0);
+    =}
+}

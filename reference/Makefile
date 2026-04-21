@@ -1,6 +1,20 @@
 # The name of the LF application inside "./src" to build/run/flash etc.
 LF_MAIN ?= HelloUc
 
+# Add modules used by the LF application
+USEMODULE += periph_i2c
+USEMODULE += printf_float
+
+# TODO: remove
+#USEMODULE += gnrc_netif
+#USEMODULE += gnrc_ipv6_default
+#USEMODULE += ipv6_addr
+#USEMODULE += netdev_default
+#USEMODULE += gnrc_netif_ieee802154
+#USEMODULE += gnrc_ipv6_default
+#USEMODULE += auto_init_gnrc_netif
+#USEMODULE += auto_init
+
 # Increase the default stack-size
 CFLAGS += -DTHREAD_STACKSIZE_MAIN=4096
 

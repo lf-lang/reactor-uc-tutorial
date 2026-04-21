@@ -7,11 +7,9 @@ main reactor {
   
   timer t(10msec, 500msec)
     
-    reaction(startup) -> led.set_state {=
-      lf_set(led.set_state, true);
-    =}
-
-    reaction(t) -> led.toggle {=
-      lf_set(led.toggle, 0);
-    =}
+  /*
+    ========================= TODO ===========================
+    Here use the led.state_state to initialize the LED and the another 
+    reaction to toggle the LED every periodically.
+  */
 }

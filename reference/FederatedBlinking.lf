@@ -1,6 +1,6 @@
 target uC
 
-import Led from "./Led.lf"
+import LedController from "./LedController.lf"
 import LSM6DS33 from "./LSM6DS33.lf"
 
 reactor SensorNode(id: int = 0) {
@@ -8,7 +8,7 @@ reactor SensorNode(id: int = 0) {
     #define ORIENTATION_TO_TIME 12566.0f
     #define OFFSET_ANGLE 12.566f // 2 * pi, to avoid division by zero
   =}
-  led = new Led();
+  led = new LedController();
   lsm6ds33 = new LSM6DS33();
   
   logical action blink: int;

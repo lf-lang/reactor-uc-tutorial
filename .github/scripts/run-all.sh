@@ -28,5 +28,5 @@ run_with_timeout() {
     fi
 }
 
-make all LF_MAIN=HelloWorld BOARD=native
-run_with_timeout 5s make term
+make all LF_MAIN=HelloUc BOARD=native
+run_with_timeout 5s make LF_MAIN=HelloUc BOARD=native term

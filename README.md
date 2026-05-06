@@ -251,7 +251,7 @@ Compile the `src/DelayedConn.lf` program and see when it stops dropping values, 
 
 ## 14. The Link Local Address of the Device
 
-Add this temporarily to your Makefile
+Temporarily add the following to your Makefile:
 
 ```
 USEMODULE += gnrc_netif
@@ -264,18 +264,27 @@ USEMODULE += auto_init_gnrc_netif
 USEMODULE += auto_init
 ```
 
-Then compile and run the `src/Ipv6LinkLocal.lf` program this program will print the Ipv6 Link Local address of this board. Copy and Save this address.
-
+Then compile and run the `src/Ipv6LinkLocal.lf` program. This program will print the IPv6 Link Local address of this board. Copy and save this address.
 
 ## 15. Going Federated
 
-We need to tell reactor-uc that we want the COAP network channel to be added to the compilation unit:
+You need to tell reactor-uc to add the COAP network channel to the compilation unit:
 
 ```Makefile
 CFLAGS += -DNETWORK_CHANNEL_COAP_RIOT
 ```
 
-The compilation command also changes because now we need to specify which federate to compile and flash:
+In reactor-uc, configure the network channels by adding annotations:
+
+```
+@interface_coap(name="if1", address="<Paste Your Link Local Address Here>")
+```
+
+Coordinate with your neighbor, agree on which federate your board will run, and exchange the IPv6 link local addresses accordingly. Also, make sure your programs have the same structure.
+
+This creates a CoAP network channel named `if1` with the specified IPv6 address. The `@link` annotation specifies which network channel interface to use for a connection.
+
+The compilation command also changes because you now need to specify which federate to compile and flash using the `LF_FED` variable:
 
 ```bash
 make LF_MAIN=SimpleCoapFederated LF_FED=r1 BOARD=adafruit-feather-nrf52840-sense all flash term
@@ -283,21 +292,11 @@ make LF_MAIN=SimpleCoapFederated LF_FED=r1 BOARD=adafruit-feather-nrf52840-sense
 make LF_MAIN=SimpleCoapFederated LF_FED=r2 BOARD=adafruit-feather-nrf52840-sense all flash term
 ```
 
-In reactor-uc you also configure the network channels by adding annotations.
-
-```
- @interface_coap(name="if1", address="<Paste Your Link Local Address Here>")
-```
-
-Coordinate with your neighbor agree on which federate your board runs and exchange the Ipv6 link local addresses accordingly. Also make sure your program have the same structure.
-
-This creates a CoAP network channel named `if1` with the specified IPv6 address. The `@link` annotation specifies which network channel interface to use for a connection.
-
-In the serial output you should now see the two federates communicating. 
+If successful, you should see in the serial output that the two federates are communicating.
 
 ## 16. The Final Boss - Federated Blinking
 
-![The final boss](https://images-wixmp-ed30a86b8c4ca887773594c2.wixmp.com/f/8bcbac46-c322-4678-9738-e08774e90a1e/ddc4s1q-db698149-fd79-4460-b9f5-4bc49b11dc41.png/v1/fill/w_894,h_894/bowser_brawl_render_remake_by_unbecomingname_ddc4s1q-pre.png?token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ1cm46YXBwOjdlMGQxODg5ODIyNjQzNzNhNWYwZDQxNWVhMGQyNmUwIiwiaXNzIjoidXJuOmFwcDo3ZTBkMTg4OTgyMjY0MzczYTVmMGQ0MTVlYTBkMjZlMCIsIm9iaiI6W1t7ImhlaWdodCI6Ijw9MjAwMCIsInBhdGgiOiIvZi84YmNiYWM0Ni1jMzIyLTQ2NzgtOTczOC1lMDg3NzRlOTBhMWUvZGRjNHMxcS1kYjY5ODE0OS1mZDc5LTQ0NjAtYjlmNS00YmM0OWIxMWRjNDEucG5nIiwid2lkdGgiOiI8PTIwMDAifV1dLCJhdWQiOlsidXJuOnNlcnZpY2U6aW1hZ2Uub3BlcmF0aW9ucyJdfQ.YbH13sRdLsjM7thEWKlIS902vqHGgzwvP6UZ4EjfO2M)
+<img src="https://images-wixmp-ed30a86b8c4ca887773594c2.wixmp.com/f/8bcbac46-c322-4678-9738-e08774e90a1e/ddc4s1q-db698149-fd79-4460-b9f5-4bc49b11dc41.png/v1/fill/w_894,h_894/bowser_brawl_render_remake_by_unbecomingname_ddc4s1q-pre.png?token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ1cm46YXBwOjdlMGQxODg5ODIyNjQzNzNhNWYwZDQxNWVhMGQyNmUwIiwiaXNzIjoidXJuOmFwcDo3ZTBkMTg4OTgyMjY0MzczYTVmMGQ0MTVlYTBkMjZlMCIsIm9iaiI6W1t7ImhlaWdodCI6Ijw9MjAwMCIsInBhdGgiOiIvZi84YmNiYWM0Ni1jMzIyLTQ2NzgtOTczOC1lMDg3NzRlOTBhMWUvZGRjNHMxcS1kYjY5ODE0OS1mZDc5LTQ0NjAtYjlmNS00YmM0OWIxMWRjNDEucG5nIiwid2lkdGgiOiI8PTIwMDAifV1dLCJhdWQiOlsidXJuOnNlcnZpY2U6aW1hZ2Uub3BlcmF0aW9ucyJdfQ.YbH13sRdLsjM7thEWKlIS902vqHGgzwvP6UZ4EjfO2M" alt="drawing" width="200"/>
 
 You made it to the final level.
 

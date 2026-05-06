@@ -1,7 +1,8 @@
 # reactor-uc unofficial DATE26 tutorial
 
-![RIOT OS Logo](https://www.riot-os.org/assets/img/riot-logo.png)
-![nrf-board](https://cdn-learn.adafruit.com/assets/assets/000/088/831/large1024/sensors_Feather_Sense_top.jpg?1583171226)
+| RIOT-OS | Adafruit Feather Sense |
+|------------------|-------------------|
+| <img src="https://www.riot-os.org/assets/img/riot-logo.png" alt="drawing" width="300"/> | <img src="https://cdn-learn.adafruit.com/assets/assets/000/088/831/large1024/sensors_Feather_Sense_top.jpg?1583171226" alt="drawing" width="300"/> |
 
 - **Git:** <https://github.com/riot-os/RIOT>
 - **Supported Boards:** <https://www.riot-os.org/boards.html>

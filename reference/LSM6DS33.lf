@@ -13,7 +13,12 @@ typedef struct Vector Vector;
 
 /* I2C Configuration */
 #define I2C_BUS         I2C_DEV(0)      // Usually I2C_DEV(0) in RIOT
-#define SENSOR_ADDR     0x6A            // SA0 pulled to GND
+
+// Sadly, three version of the sensor have different addresses: DS33/DS3/DSOX
+#define SENSOR_ADDR1     0x69
+#define SENSOR_ADDR2     0x6A
+#define SENSOR_ADDR3     0x6C
+
 #define I2C_FLAG_NONE   0
 
 /* LSM6DS33 Register Map */
@@ -45,6 +50,8 @@ reactor LSM6DS33 {
 
   state counter: int;
 
+  state sensor_addr: uint8_t;
+
   reaction(startup) {=
     printf("initializing sensor\n");
     uint8_t whoami;
@@ -57,45 +64,50 @@ reactor LSM6DS33 {
     i2c_acquire(I2C_BUS);
 
     // 2. Verify connection (WHO_AM_I)
-    if (i2c_read_reg(I2C_BUS, SENSOR_ADDR, WHO_AM_I, &whoami, I2C_FLAG_NONE) < 0) {
-        i2c_release(I2C_BUS);
-        printf("failure releasing i2c\n");
-        return;
+    uint8_t addrs[] = {0x6A, 0x6B};
+    int found = 0;
+
+    for (int i = 0; i < 2; i++) {
+      if (i2c_read_reg(I2C_BUS, addrs[i], WHO_AM_I, &whoami, I2C_FLAG_NONE) >= 0) {
+        if (whoami == SENSOR_ADDR1 || whoami == SENSOR_ADDR2 || whoami == SENSOR_ADDR2) { // DS33/DS3/DSOX variants
+          self->sensor_addr = addrs[i];
+          found = 1;
+          break;
+        }
+      }
     }
-    if (whoami != 0x69) {
+    if (!found) {
         i2c_release(I2C_BUS);
-        printf("failure wrong device\n");
+        printf("failure: device not found\n");
         return; // Wrong device
     }
 
     // 3. Software Reset
-    i2c_write_reg(I2C_BUS, SENSOR_ADDR, CTRL3_C, 0x05, I2C_FLAG_NONE);
+    i2c_write_reg(I2C_BUS, self->sensor_addr, CTRL3_C, 0x05, I2C_FLAG_NONE);
     
     // 4. Configure Accel (208 Hz, +/- 2g)
-    i2c_write_reg(I2C_BUS, SENSOR_ADDR, CTRL1_XL, 0x40, I2C_FLAG_NONE);
+    i2c_write_reg(I2C_BUS, self->sensor_addr, CTRL1_XL, 0x40, I2C_FLAG_NONE);
 
     // 5. Configure Gyro (208 Hz, 245 dps)
-    i2c_write_reg(I2C_BUS, SENSOR_ADDR, CTRL2_G, 0x50, I2C_FLAG_NONE);
+    i2c_write_reg(I2C_BUS, self->sensor_addr, CTRL2_G, 0x50, I2C_FLAG_NONE);
 
     // 6. Enable Block Data Update and Auto-increment (IF_INC)
-    i2c_write_reg(I2C_BUS, SENSOR_ADDR, CTRL3_C, 0x44, I2C_FLAG_NONE);
+    i2c_write_reg(I2C_BUS, self->sensor_addr, CTRL3_C, 0x44, I2C_FLAG_NONE);
 
     i2c_release(I2C_BUS);
 
-    printf("successfull sensor initialization\n");
+    printf("successful sensor initialization\n");
   =}
 
   reaction(t) -> orientation {=
-    printf("reading gyro data\n");
     uint8_t buf[6];
     int16_t raw_x, raw_y, raw_z;
-
+    
     i2c_acquire(I2C_BUS);
-    // Read 6 bytes: XL, XH, YL, YH, ZL, ZH
-    if (i2c_read_regs(I2C_BUS, SENSOR_ADDR, GYRO_OUTX_L, buf, 6, 0) < 0) {
-        i2c_release(I2C_BUS);
-        printf("failed to read gyro data\n");
-        return;
+    if (i2c_read_regs(I2C_BUS, self->sensor_addr, GYRO_OUTX_L, buf, 6, I2C_FLAG_NONE) < 0) {
+      i2c_release(I2C_BUS);
+      printf("failed to read gyro data\n");
+      return;
     }
     i2c_release(I2C_BUS);
 
@@ -135,8 +147,8 @@ reactor LSM6DS33 {
     self->angle_y += gy * DT;
     self->angle_z += gz * DT;
 
-    printf("diff: %.6f, %.6f, %.6f\n", gx * DT, gy * DT, gz * DT);
-    printf("total: %.6f, %.6f, %.6f\n", self->angle_x, self->angle_y, self->angle_z);
+    // printf("\rdiff: %.6f, %.6f, %.6f", gx * DT, gy * DT, gz * DT);
+    // printf("\ttotal: %.6f, %.6f, %.6f", self->angle_x, self->angle_y, self->angle_z);
 
     struct Vector vec;
     vec.x = self->angle_x;

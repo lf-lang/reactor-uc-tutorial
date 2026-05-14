@@ -112,6 +112,8 @@ brew install --cask gcc-arm-embedded
 
 ## 2. Start Using this Repository
 
+[![asciicast](https://asciinema.org/a/vtbh6zCib2qt9Gl4.svg)](https://asciinema.org/a/vtbh6zCib2qt9Gl4)
+
 The RIOT OS sources are provided as a submodule of the new repository, to fetch them do:
 
 ```bash
@@ -159,6 +161,10 @@ make LF_MAIN=HelloUc BOARD=adafruit-feather-nrf52840-sense all
 
 ## 7. Flash the Program onto Your Board
 
+<!--<script src="https://asciinema.org/a/h6JN8xz6CtvrBZQZ.js" id="asciicast-h6JN8xz6CtvrBZQZ" async="true"></script>-->
+![flashing](./assets/flashing.mp4)
+
+
 ```bash
 make flash
 ```
@@ -190,6 +196,8 @@ to
 ```
 CFLAGS += -DLF_LOG_LEVEL_ALL=LF_LOG_LEVEL_DEBUG
 ```
+
+<script src="https://asciinema.org/a/QNiCaJzZ4GmuwVzb.js" id="asciicast-QNiCaJzZ4GmuwVzb" async="true"></script>
 
 ## 9. Sensor Makefile Configuration
 
@@ -226,6 +234,11 @@ PERIOD = ORIENTATION_TO_TIME / (current_angle + OFFSET)
 ```
 
 This produces our `PERIOD` in milliseconds.
+
+|  Flashing and Terminal Output | How is should look |
+| ---------------- | ----------------- |
+| <script src="https://asciinema.org/a/pYtXSDXCOf5u3Awe.js" id="asciicast-pYtXSDXCOf5u3Awe" async="true"></script> | |
+
 
 Flash the program and rotate the device around its longest axis to see the LED blink rate change.
 
@@ -266,6 +279,8 @@ USEMODULE += auto_init
 ```
 
 Then compile and run the `src/Ipv6LinkLocal.lf` program. This program will print the IPv6 Link Local address of this board. Copy and save this address.
+
+<script src="https://asciinema.org/a/vtzf2Hq9Z55BJg67.js" id="asciicast-vtzf2Hq9Z55BJg67" async="true"></script>
 
 ## 15. Going Federated
 

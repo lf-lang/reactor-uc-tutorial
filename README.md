@@ -161,10 +161,7 @@ make LF_MAIN=HelloUc BOARD=adafruit-feather-nrf52840-sense all
 
 ## 7. Flash the Program onto Your Board
 
-<!--<script src="https://asciinema.org/a/h6JN8xz6CtvrBZQZ.js" id="asciicast-h6JN8xz6CtvrBZQZ" async="true"></script>-->
-
-![flashing](./assets/flashing.mp4)
-
+![flashing](./assets/compile-and-flash.gif)
 
 ```bash
 make flash
@@ -198,7 +195,7 @@ to
 CFLAGS += -DLF_LOG_LEVEL_ALL=LF_LOG_LEVEL_DEBUG
 ```
 
-<script src="https://asciinema.org/a/QNiCaJzZ4GmuwVzb.js" id="asciicast-QNiCaJzZ4GmuwVzb" async="true"></script>
+![debug](./assets/enable-debugging-logging.gif)
 
 ## 9. Sensor Makefile Configuration
 
@@ -236,10 +233,7 @@ PERIOD = ORIENTATION_TO_TIME / (current_angle + OFFSET)
 
 This produces our `PERIOD` in milliseconds.
 
-|  Flashing and Terminal Output | How is should look |
-| ---------------- | ----------------- |
-| <script src="https://asciinema.org/a/pYtXSDXCOf5u3Awe.js" id="asciicast-pYtXSDXCOf5u3Awe" async="true"></script> | |
-
+![sensor](./assets/sensor.gif)
 
 Flash the program and rotate the device around its longest axis to see the LED blink rate change.
 

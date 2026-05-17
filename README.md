@@ -212,8 +212,9 @@ Or override the Makefile configuration with parameters:
 ```bash
 make LF_MAIN=HelloUc BOARD=adafruit-feather-nrf52840-sense flash
 ```
-
-![flash_and_blinking](./assets/flashing_blinking.gif)
+| Flashing Procedure | LF Diagram |
+|--------------------| ------------ |
+|![flash_and_blinking](./assets/flashing_blinking.gif) | ![blink_diagram](./assets/HelloUc.svg)
 
 ## 8. Open a Terminal
 

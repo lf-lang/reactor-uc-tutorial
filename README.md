@@ -213,6 +213,8 @@ Or override the Makefile configuration with parameters:
 make LF_MAIN=HelloUc BOARD=adafruit-feather-nrf52840-sense flash
 ```
 
+![flash_and_blinking](./assets/flashing_blinking.gif)
+
 ## 8. Open a Terminal
 
 You can open a terminal that interacts with stdin and stdout of your program as follows:

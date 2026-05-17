@@ -12,111 +12,121 @@
 
 ______
 
-This is a tutorial for Lingua Franca applications running on RIOT OS with the [Adafruit Feather Sense](https://learn.adafruit.com/adafruit-feather-sense) board. 
+This is a tutorial for Lingua Franca applications running on RIOT OS with the [Adafruit Feather Sense](https://learn.adafruit.com/adafruit-feather-sense) board. It uses [reactor-uc](https://github.com/lf-lang/reactor-uc), the "micro C" target for Lingua Franca.
 
 ## 1. Prerequisites
 
-### 1.1. Basic
+### Supported Operating Systems
 
-You must use one of the following operating systems:
+| OS | Support Level |
+|----|---------------|
+| **Linux** (Ubuntu/Debian) | Fully supported (recommended) |
+| **NixOS / Nix** | Fully supported |
+| **macOS** | Supported with caveats |
 
-- `Linux` Officially supported are Debian & Ubuntu
-- `macOS`
+> **Note:** For detailed RIOT OS setup instructions, see the official [RIOT Getting Started Guide](https://doc.riot-os.org/getting-started.html).
 
-Your system must have the following software packages (you likely have at least some of these already):
+---
 
-- `git` — [a distributed version control system](https://git-scm.com/)
-- `make` — Version 4.0 or higher required for RIOT (see [macOS Hints](#macos-hints))
-- `java` — [Java 17](https://openjdk.org/projects/jdk/17)
-- Optional: `nix` — [a purely functional package manager](https://nix.dev/tutorials/install-nix)
+### 1. Clone reactor-uc and this tutorial
 
-#### Installation on Debian & Ubuntu
+![clone](./assets/git-setup.gif)
+
+```bash
+# Clone via HTTPS
+git clone https://github.com/lf-lang/reactor-uc.git --recurse-submodules
+
+# Or clone via SSH
+git clone git@github.com:lf-lang/reactor-uc.git --recurse-submodules
+
+# Set the environment variable (add to ~/.bashrc for persistence)
+export REACTOR_UC_PATH=$(pwd)/reactor-uc
+```
+
+
+### 1.1. Linux (Ubuntu / Debian)
+
+Most RIOT OS developers use Linux, providing the most streamlined experience. Ubuntu is recommended for newcomers.
+
+**Install required packages:**
 
 ```bash
 sudo apt update
-sudo apt install git openjdk-17-jdk openjdk-17-jre nix cmake build-essential python3
-sudo pip install pyserial
+sudo apt install git openjdk-17-jdk openjdk-17-jre cmake build-essential \
+    python3 python3-serial gcc-arm-none-eabi gdb-multiarch openocd
 ```
 
-#### Installation on macOS
+### 1.2. NixOS / Nix Package Manager
+
+This is the easiest setup method. The repository includes a `shell.nix` / `flake.nix` that provisions all dependencies automatically.
+
+**If you don't have Nix installed:**
 
 ```bash
-brew install git cmake openjdk@17 make
 curl -L https://nixos.org/nix/install | sh
-pip install pyserial
 ```
 
-Note that on macOS, `make` will be installed as `gmake`, so use `gmake` instead of `make` in all commands below.
+Otherwise use your package manager to install it.
 
-### 1.2. Micro C Target for Lingua Franca
-
-This template uses [reactor-uc](https://github.com/lf-lang/reactor-uc), the "micro C" target for Lingua Franca. Clone this repo with one of the following commands:
-
-#### Clone via HTTPS
-
-```bash
-git clone https://github.com/lf-lang/reactor-uc.git --recurse-submodules
-```
-
-#### Or Clone via SSH
-
-```bash
-git clone git@github.com:lf-lang/reactor-uc.git --recurse-submodules
-```
-
-And make sure that the `REACTOR_UC_PATH` environment variable is pointing to it.
-
-### 1.3. Install a Cross-Compiler for your Board
-
-This README only covers arm-based boards. For boards having a CPU with different architecture, please check which cross-compilers are available for your operating system.
-
-A quick way to check if you already have an arm cross-compiler installed:
-
-```bash
-which arm-none-eabi-gcc
-```
-
-#### Debian & Ubuntu
-
-```bash
-sudo apt install gcc-arm-none-eabi 
-```
-
-#### Nix
-
-The template repo includes support for using the [nix](https://nix.dev) package manager to perform the installation. It is currently set to support ARM-based boards that use the `arm-none-eabi-gcc` cross-compiler.
-
-The following command creates a shell environment in which all necessary dependencies are installed.
+**Enter the development environment:**
 
 ```bash
 nix develop
 ```
 
-This creates a new shell in which the cross-compiler is available.
-**IMPORTANT**: Don't forget to run ``nix develop`` again when you return to your project in a new shell.
+This creates a shell with all dependencies (cross-compiler, Java, etc.) pre-installed. No manual package installation required.
 
-#### MacOS
+> **Important:** Run `nix develop` each time you open a new terminal session for this project.
 
-On Mac, you need to install the full toolchain for  `arm-none-eabi-gcc` using the following HomeBrew command.
+### 1.3. macOS
+
+Native macOS development is supported but requires additional setup. macOS ships with an older version of `make`, so you must install GNU Make 4.0+.
+
+**Install required packages via Homebrew:**
+
+```bash
+brew install git cmake openjdk@17 make
+pip3 install pyserial
+```
+
+**Install the ARM cross-compiler:**
 
 ```bash
 brew install --cask gcc-arm-embedded
 ```
 
-**IMPORTANT** You should not install the arm-none-eabi-gcc formula. If you accidentally did this, you can uninstall the formula and install the full toolchain like this:
+> **Warning:** Do not install the `arm-none-eabi-gcc` formula. If you did, uninstall it first:
+> ```bash
+> brew uninstall arm-none-eabi-gcc
+> brew install --cask gcc-arm-embedded
+> ```
+
+> **Important:** On macOS, `make` is installed as `gmake`. Use `gmake` instead of `make` in all commands below.
+
+---
+
+### 1.4. Verify Your Setup
+
+Check that the required tools are available:
 
 ```bash
-brew uninstall arm-none-eabi-gcc
-brew install --cask gcc-arm-embedded
+# Check cross-compiler
+which arm-none-eabi-gcc
+
+# Check Java version (should be 17+)
+java -version
+
+# Check make version (should be 4.0+)
+make --version   # or gmake --version on macOS
 ```
 
 ## 2. Start Using this Repository
 
-[![asciicast](https://asciinema.org/a/vtbh6zCib2qt9Gl4.svg)](https://asciinema.org/a/vtbh6zCib2qt9Gl4)
 
 The RIOT OS sources are provided as a submodule of the new repository, to fetch them do:
 
 ```bash
+cd reactor-uc-tutorial
 git submodule update --init --recursive
 ```
 

@@ -145,17 +145,47 @@ Alternatively, you can override the board on the command line. For example:
 make LF_MAIN=HelloUc all
 ```
 
-## 4. LED Reactor
+## 4. LedController Reactor
 
-Open `src/Led.lf` and implement a reactor for controlling the on-board LEDs. 
-You can find the reactor-uc reaction api [here](http://micro-lf.org/documentation/reaction_api/), you can read the value of a trigger with `port_name->value` and you 
-can set ports with `lf_set(port_name, <value>)`.
+Modify `src/LedController.lf` — a reactor that controls the on-board LED.
 
+> **Lingua Franca docs:** [lf-lang.org/docs](https://www.lf-lang.org/docs/)
 
-## 5. HelloUc Reactor
+### Task
 
-In `HelloUc.lf`, use the LED reactor to toggle the LED at a fixed rate.
+Finish the `LedController` reactor by adding an input port `toggle` that triggers an reaction that toggles the on-board led.
 
+Use the RIOT macros from `led.h`: `LED0_TOGGLE` and `LED1_TOGGLE`
+
+---
+
+## 5. HelloUc: Using the LedController
+
+Edit `src/HelloUc.lf` to use your `LedController` with a periodic timer.
+
+You can import reactor from other files like this:
+
+```
+import LedController from "./LedController.lf"
+```
+
+### Task
+
+1. Import `LedController` from `./LedController.lf`
+2. Instantiate it as `led`
+3. Add a timer `t` with 10ms offset and 500ms period
+4. Add a `startup` reaction that sets the LED on initially
+5. Add a timer reaction that toggles the LED
+
+```lf
+target uC
+
+import LedController from "./LedController.lf"
+
+main reactor {
+  // TODO: instantiate led, add timer, add reactions
+}
+```
 
 ## 6. Build
 

@@ -278,7 +278,11 @@ This produces our `PERIOD` in milliseconds.
 
 ![sensor](./assets/sensor.gif)
 
-Flash the program and rotate the device around its longest axis to see the LED blink rate change.
+Flash the program and rotate the device around its longest axis to see the LED blink rate change. See the video below.
+
+| Flashing Procedure | LF Diagram |
+|--------------------| ------------ |
+|![flash_and_blinking](./assets/sensor_rotating.gif) | ![blink_diagram](./assets/Sensor.svg)
 
 ## 12. Annotations
 
@@ -347,6 +351,11 @@ make LF_MAIN=SimpleCoapFederated LF_FED=r2 BOARD=adafruit-feather-nrf52840-sense
 ```
 
 If successful, you should see in the serial output that the two federates are communicating.
+
+
+| Flashing Procedure | LF Diagram |
+|--------------------| ------------ |
+|![flash_and_blinking](./assets/simple_federated.gif) | ![blink_diagram](./assets/SimpleCoapFederated.svg)
 
 ## 16. The Final Boss - Federated Blinking
 

@@ -162,6 +162,7 @@ make LF_MAIN=HelloUc BOARD=adafruit-feather-nrf52840-sense all
 ## 7. Flash the Program onto Your Board
 
 <!--<script src="https://asciinema.org/a/h6JN8xz6CtvrBZQZ.js" id="asciicast-h6JN8xz6CtvrBZQZ" async="true"></script>-->
+
 ![flashing](./assets/flashing.mp4)
 
 
@@ -280,7 +281,7 @@ USEMODULE += auto_init
 
 Then compile and run the `src/Ipv6LinkLocal.lf` program. This program will print the IPv6 Link Local address of this board. Copy and save this address.
 
-<script src="https://asciinema.org/a/vtzf2Hq9Z55BJg67.js" id="asciicast-vtzf2Hq9Z55BJg67" async="true"></script>
+![ipv6](./assets/ipv6-link-local.gif)
 
 ## 15. Going Federated
 

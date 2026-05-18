@@ -1,0 +1,49 @@
+target uC
+
+import LedController from "./LedController.lf"
+
+reactor TButton {
+  preamble {=
+#include "board.h"
+#include "periph/gpio.h"
+#include "ztimer.h"
+
+static gpio_t button = BTN0_PIN;
+Action* physical_action = NULL;
+
+void button_callback(void *arg) {
+    (void)arg;
+    printf("Interrupt triggered %p\n", physical_action);
+    if (physical_action != NULL) {
+      printf("Interrupt triggered %p\n", physical_action);
+    } else {
+       int __val = 0;
+       Action_schedule((Action*)physical_action, MSEC(10), &__val);
+    }
+}
+  =}
+
+  physical action button_pressed_action: int;
+  output button_pressed: int;
+
+  reaction(startup) {=
+    physical_action = &self->button_pressed_action.super.super;
+    gpio_init_int(button, GPIO_IN_PU, GPIO_BOTH, button_callback, NULL);
+  =}
+
+  reaction(button_pressed_action) -> button_pressed {=
+    //lf_set(button_pressed, 0);
+  =}
+}
+
+main reactor {
+  timer t(0sec, 500msec);
+  led0 = new LedController(num=0);
+  led1 = new LedController(num=1);
+  b = new TButton();
+  //b.button_pressed -> led0.toggle;
+
+  reaction(t) -> led1.toggle {=
+    lf_set(led1.toggle, 1);
+  =}
+}

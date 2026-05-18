@@ -18,13 +18,15 @@ reactor DataSink {
     =}
 }
 
+/*
+  Task: The high-frequency source (1ms timer) with a 500ms delayed connection will drop
+  values if the buffer is too small. Experiment with different @buffer values to find
+  the minimum buffer size that prevents dropped values.
+*/
 main reactor {
     source = new HighFrequencySource();
     sink = new DataSink();
-    
-    /*
-      ========================= TODO ===========================
-      Here an annotation is missing ;D
-    */
-    source.out -> sink.in after 500msec; 
+
+    @buffer(5)
+    source.out -> sink.in after 500msec;
 }

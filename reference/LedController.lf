@@ -4,20 +4,31 @@ preamble {=
   #include "led.h"
 =}
 
-reactor LedController {
-  input toggle: int;
+reactor LedController(num: int = 0) {
   input set_state: bool;
-
-  reaction (toggle) {=
-    LED0_TOGGLE;
-  =}
+  input toggle: int;
 
   reaction (set_state) {=
     if (set_state->value) {
-      LED0_ON;
+      if (self->num == 0) {
+        LED0_ON;
+      } else {
+        LED1_ON;
+      } 
     } else {
-      LED0_OFF;
+      if (self->num == 0) {
+        LED0_OFF;
+      } else {
+        LED1_OFF;
+      } 
+    }
+  =}
+
+  reaction (toggle) {=
+    if (self->num == 0) {
+      LED0_TOGGLE;
+    } else {
+      LED1_TOGGLE;
     }
   =}
 }
-

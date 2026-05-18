@@ -207,9 +207,9 @@ Modify `src/LedController.lf` — a reactor that controls the on-board LED.
 
 > **Lingua Franca docs:** [lf-lang.org/docs](https://www.lf-lang.org/docs/)
 
-**Task 1:** Add an input port named `toggle`.
+**Task:** Add an input port named `toggle`.
 
-**Task 2:** Implement a reaction that reacts on the `toggle` input port. This reaction should check the state variable `self->num` to toggle either LED 0 or LED 1.
+**Task:** Implement a reaction that reacts on the `toggle` input port. This reaction should check the state variable `self->num` to toggle either LED 0 or LED 1.
 
 Use the RIOT macros from `led.h`: `LED0_TOGGLE` and `LED1_TOGGLE`
 
@@ -225,9 +225,9 @@ import LedController from "./LedController.lf"
 
 The file already imports and instantiates the `LedController` as `led`, and includes a `startup` reaction that sets the LED on initially.
 
-**Task 1:** Add a timer.
+**Task:** Add a timer.
 
-**Task 2:** Add a reaction that is triggered by the timer and toggles the `led.toggle` port.
+**Task:** Add a reaction that is triggered by the timer and toggles the `led.toggle` port.
 
 | Flashing Procedure | LF Diagram |
 |--------------------| ------------ |
@@ -301,7 +301,9 @@ The timeout property can be found inside the `src-gen/Sensor/lf_start.c` file in
 
 Before we go federated it is good to look into the `@buffer` annotation, which can be added to delayed connections to increase the associated buffer for storing the values. If you have a timer with a high frequency it is very easy to run out of space inside the connection.
 
-Compile the `src/DelayedConn.lf` program and see when it stops dropping values, by changing the `@buffer` annotation.
+**Task:** The `DelayedConn.lf` program has a high-frequency source (1ms timer) with a 500ms delayed connection. Experiment with different `@buffer` values to find the minimum buffer size that prevents dropped values.
+
+Compile and Flash your program, then observe the output and adjust the `@buffer` annotation until no values are dropped.
 
 ---
 
@@ -340,7 +342,7 @@ In reactor-uc, configure the network channels by adding annotations:
 @interface_coap(name="if1", address="<Paste Your Link Local Address Here>")
 ```
 
-Coordinate with your neighbor, agree on which federate your board will run, and exchange the IPv6 link local addresses accordingly. Also, make sure your programs have the same structure.
+**Task:** Coordinate with your neighbor, agree on which federate your board will run, and exchange the IPv6 link local addresses accordingly. Also, make sure your programs have the same structure.
 
 This creates a CoAP network channel named `if1` with the specified IPv6 address. The `@link` annotation specifies which network channel interface to use for a connection.
 

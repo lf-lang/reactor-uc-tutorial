@@ -1,8 +1,6 @@
-# reactor-uc unofficial DATE26 tutorial
+# micro-LF tutorial on RIOT-OS
 
-| RIOT-OS | Adafruit Feather Sense |
-|------------------|-------------------|
-| <img src="https://www.riot-os.org/assets/img/riot-logo.png" alt="drawing" width="300"/> | <img src="https://cdn-learn.adafruit.com/assets/assets/000/088/831/large1024/sensors_Feather_Sense_top.jpg?1583171226" alt="drawing" width="300"/> |
+![banner](./assets/header.svg)
 
 - **Git:** <https://github.com/riot-os/RIOT>
 - **Supported Boards:** <https://www.riot-os.org/boards.html>
@@ -14,9 +12,11 @@ ______
 
 This is a tutorial for Lingua Franca applications running on RIOT OS with the [Adafruit Feather Sense](https://learn.adafruit.com/adafruit-feather-sense) board. It uses [reactor-uc](https://github.com/lf-lang/reactor-uc), the "micro C" target for Lingua Franca.
 
-## 1. Prerequisites
+---
 
-### Supported Operating Systems
+## Part 1: Environment Setup
+
+### 1.1. Supported Operating Systems
 
 | OS | Support Level |
 |----|---------------|
@@ -26,9 +26,7 @@ This is a tutorial for Lingua Franca applications running on RIOT OS with the [A
 
 > **Note:** For detailed RIOT OS setup instructions, see the official [RIOT Getting Started Guide](https://doc.riot-os.org/getting-started.html).
 
----
-
-### 1. Clone reactor-uc and this tutorial
+### 1.2. Clone reactor-uc and this tutorial
 
 ![clone](./assets/git-setup.gif)
 
@@ -43,8 +41,11 @@ git clone git@github.com:lf-lang/reactor-uc.git --recurse-submodules
 export REACTOR_UC_PATH=$(pwd)/reactor-uc
 ```
 
+### 1.3. Install Dependencies
 
-### 1.1. Linux (Ubuntu / Debian)
+Choose the setup method for your operating system:
+
+#### 1.3.1. Linux (Ubuntu / Debian)
 
 Most RIOT OS developers use Linux, providing the most streamlined experience. Ubuntu is recommended for newcomers.
 
@@ -56,7 +57,7 @@ sudo apt install git openjdk-17-jdk openjdk-17-jre cmake build-essential \
     python3 python3-serial gcc-arm-none-eabi gdb-multiarch openocd
 ```
 
-### 1.2. NixOS / Nix Package Manager
+#### 1.3.2. NixOS / Nix Package Manager
 
 This is the easiest setup method. The repository includes a `shell.nix` / `flake.nix` that provisions all dependencies automatically.
 
@@ -78,7 +79,7 @@ This creates a shell with all dependencies (cross-compiler, Java, etc.) pre-inst
 
 > **Important:** Run `nix develop` each time you open a new terminal session for this project.
 
-### 1.3. macOS
+#### 1.3.3. macOS
 
 Native macOS development is supported but requires additional setup. macOS ships with an older version of `make`, so you must install GNU Make 4.0+.
 
@@ -103,8 +104,6 @@ brew install --cask gcc-arm-embedded
 
 > **Important:** On macOS, `make` is installed as `gmake`. Use `gmake` instead of `make` in all commands below.
 
----
-
 ### 1.4. Verify Your Setup
 
 Check that the required tools are available:
@@ -120,19 +119,22 @@ java -version
 make --version   # or gmake --version on macOS
 ```
 
-## 2. Start Using this Repository
+### 1.5. Initialize the Repository
 
-
-The RIOT OS sources are provided as a submodule of the new repository, to fetch them do:
+The RIOT OS sources are provided as a submodule of the repository. Fetch them with:
 
 ```bash
 cd reactor-uc-tutorial
 git submodule update --init --recursive
 ```
 
-## 3. Configure the Makefile
+---
 
-The repository has a `Makefile` that governs the build. By default, it compiles the LF program in `src/HelloUc.lf`. To compile a different program, edit the `Makefile` to set `LF_MAIN` to your program and `BOARD` to your board. 
+## Part 2: Getting Started
+
+### 2.1. Configure the Makefile
+
+The repository has a `Makefile` that governs the build. By default, it compiles the LF program in `src/HelloUc.lf`. To compile a different program, edit the `Makefile` to set `LF_MAIN` to your program and `BOARD` to your board.
 
 ```Makefile
 LF_MAIN ?= HelloUc
@@ -145,49 +147,7 @@ Alternatively, you can override the board on the command line. For example:
 make LF_MAIN=HelloUc all
 ```
 
-## 4. LedController Reactor
-
-Modify `src/LedController.lf` — a reactor that controls the on-board LED.
-
-> **Lingua Franca docs:** [lf-lang.org/docs](https://www.lf-lang.org/docs/)
-
-### Task
-
-Finish the `LedController` reactor by adding an input port `toggle` that triggers an reaction that toggles the on-board led.
-
-Use the RIOT macros from `led.h`: `LED0_TOGGLE` and `LED1_TOGGLE`
-
----
-
-## 5. HelloUc: Using the LedController
-
-Edit `src/HelloUc.lf` to use your `LedController` with a periodic timer.
-
-You can import reactor from other files like this:
-
-```
-import LedController from "./LedController.lf"
-```
-
-### Task
-
-1. Import `LedController` from `./LedController.lf`
-2. Instantiate it as `led`
-3. Add a timer `t` with 10ms offset and 500ms period
-4. Add a `startup` reaction that sets the LED on initially
-5. Add a timer reaction that toggles the LED
-
-```lf
-target uC
-
-import LedController from "./LedController.lf"
-
-main reactor {
-  // TODO: instantiate led, add timer, add reactions
-}
-```
-
-## 6. Build
+### 2.2. Build
 
 ```bash
 make all
@@ -199,7 +159,7 @@ Or override the Makefile configuration with parameters:
 make LF_MAIN=HelloUc BOARD=adafruit-feather-nrf52840-sense all
 ```
 
-## 7. Flash the Program onto Your Board
+### 2.3. Flash the Program onto Your Board
 
 ![flashing](./assets/compile-and-flash.gif)
 
@@ -212,11 +172,8 @@ Or override the Makefile configuration with parameters:
 ```bash
 make LF_MAIN=HelloUc BOARD=adafruit-feather-nrf52840-sense flash
 ```
-| Flashing Procedure | LF Diagram |
-|--------------------| ------------ |
-|![flash_and_blinking](./assets/flashing_blinking.gif) | ![blink_diagram](./assets/HelloUc.svg)
 
-## 8. Open a Terminal
+### 2.4. Open a Terminal
 
 You can open a terminal that interacts with stdin and stdout of your program as follows:
 
@@ -240,17 +197,67 @@ CFLAGS += -DLF_LOG_LEVEL_ALL=LF_LOG_LEVEL_DEBUG
 
 ![debug](./assets/enable-debugging-logging.gif)
 
-## 9. Sensor Makefile Configuration
+---
+
+## Part 3: Basic Tutorial
+
+### 3.1. LedController Reactor
+
+Modify `src/LedController.lf` — a reactor that controls the on-board LED.
+
+> **Lingua Franca docs:** [lf-lang.org/docs](https://www.lf-lang.org/docs/)
+
+**Task:** Finish the `LedController` reactor by adding an input port `toggle` that triggers a reaction that toggles the on-board LED.
+
+Use the RIOT macros from `led.h`: `LED0_TOGGLE` and `LED1_TOGGLE`
+
+### 3.2. HelloUc: Using the LedController
+
+Edit `src/HelloUc.lf` to use your `LedController` with a periodic timer.
+
+You can import reactor from other files like this:
+
+```
+import LedController from "./LedController.lf"
+```
+
+**Task:**
+
+1. Import `LedController` from `./LedController.lf`
+2. Instantiate it as `led`
+3. Add a timer `t` with 10ms offset and 500ms period
+4. Add a `startup` reaction that sets the LED on initially
+5. Add a timer reaction that toggles the LED
+
+```lf
+target uC
+
+import LedController from "./LedController.lf"
+
+main reactor {
+  // TODO: instantiate led, add timer, add reactions
+}
+```
+
+| Flashing Procedure | LF Diagram |
+|--------------------| ------------ |
+|![flash_and_blinking](./assets/flashing_blinking.gif) | ![blink_diagram](./assets/HelloUc.svg)
+
+---
+
+## Part 4: Sensor Integration
+
+### 4.1. Sensor Makefile Configuration
 
 Add the following lines to your Makefile to enable I2C support in RIOT:
 
 ```Makefile
 # so i2c and printf support for floats is compiled into the riot kernel
-USEMODULE += periph_i2c 
+USEMODULE += periph_i2c
 USEMODULE += printf_float
 ```
 
-## 10. Implementing the Sensor
+### 4.2. Implementing the Sensor
 
 The Adafruit Feather Sense includes many sensors. We'll focus on the [LSM6DS33](https://www.pololu.com/file/0J1087/LSM6DS33.pdf) accelerometer and gyro. See the [full sensor list](https://learn.adafruit.com/adafruit-feather-sense) for details.
 
@@ -263,8 +270,7 @@ To test your sensor implementation, compile and run `Sensor.lf` (which includes 
 make LF_MAIN=Sensor BOARD=adafruit-feather-nrf52840-sense all flash term
 ```
 
-
-## 11. Using Sensor Values
+### 4.3. Using Sensor Values
 
 Make the LED blink faster or slower based on the device's orientation. When flat on a table (angle ≈ 0), use a 1-second LED toggle period. 
 
@@ -284,7 +290,11 @@ Flash the program and rotate the device around its longest axis to see the LED b
 |--------------------| ------------ |
 |![flash_and_blinking](./assets/sensor_rotating.gif) | ![blink_diagram](./assets/Sensor.svg)
 
-## 12. Annotations
+---
+
+## Part 5: Advanced Features
+
+### 5.1. Annotations
 
 reactor-uc supports many annotations; see the [full list](http://micro-lf.org/documentation/annotations/). In this scenario, we'll add a `timeout` and configure a buffer size for actions.
 
@@ -297,15 +307,17 @@ You can validate if the code generator correctly adjusted the action buffer size
 
 The timeout property can be found inside the `src-gen/Sensor/lf_start.c` file inside the `DynamicScheduler_ctor`.
 
-
-
-## 13. Delayed Connections and the Buffer Annotation
+### 5.2. Delayed Connections and the Buffer Annotation
 
 Before we go federated it is good to look into the `@buffer` annotation, which can be added to delayed connections to increase the associated buffer for storing the values. If you have a timer with a high frequency it is very easy to run out of space inside the connection.
 
 Compile the `src/DelayedConn.lf` program and see when it stops dropping values, by changing the `@buffer` annotation.
 
-## 14. The Link Local Address of the Device
+---
+
+## Part 6: Federated Execution
+
+### 6.1. Finding Your Device's IPv6 Address
 
 Temporarily add the following to your Makefile:
 
@@ -324,7 +336,7 @@ Then compile and run the `src/Ipv6LinkLocal.lf` program. This program will print
 
 ![ipv6](./assets/ipv6-link-local.gif)
 
-## 15. Going Federated
+### 6.2. Simple Federated Example
 
 You need to tell reactor-uc to add the COAP network channel to the compilation unit:
 
@@ -357,7 +369,7 @@ If successful, you should see in the serial output that the two federates are co
 |--------------------| ------------ |
 |![flash_and_blinking](./assets/simple_federated.gif) | ![blink_diagram](./assets/SimpleCoapFederated.svg)
 
-## 16. The Final Boss - Federated Blinking
+### 6.3. The Final Boss - Federated Blinking
 
 <img src="https://images-wixmp-ed30a86b8c4ca887773594c2.wixmp.com/f/8bcbac46-c322-4678-9738-e08774e90a1e/ddc4s1q-db698149-fd79-4460-b9f5-4bc49b11dc41.png/v1/fill/w_894,h_894/bowser_brawl_render_remake_by_unbecomingname_ddc4s1q-pre.png?token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ1cm46YXBwOjdlMGQxODg5ODIyNjQzNzNhNWYwZDQxNWVhMGQyNmUwIiwiaXNzIjoidXJuOmFwcDo3ZTBkMTg4OTgyMjY0MzczYTVmMGQ0MTVlYTBkMjZlMCIsIm9iaiI6W1t7ImhlaWdodCI6Ijw9MjAwMCIsInBhdGgiOiIvZi84YmNiYWM0Ni1jMzIyLTQ2NzgtOTczOC1lMDg3NzRlOTBhMWUvZGRjNHMxcS1kYjY5ODE0OS1mZDc5LTQ0NjAtYjlmNS00YmM0OWIxMWRjNDEucG5nIiwid2lkdGgiOiI8PTIwMDAifV1dLCJhdWQiOlsidXJuOnNlcnZpY2U6aW1hZ2Uub3BlcmF0aW9ucyJdfQ.YbH13sRdLsjM7thEWKlIS902vqHGgzwvP6UZ4EjfO2M" alt="drawing" width="200"/>
 
@@ -366,6 +378,6 @@ You made it to the final level.
 Open the the `src/FederatedBlinking.lf` file now we want to combine everything learned and
 here we want to let the local Blink faster if neighbors microcontroller is turned.
 
-The make sure all the necessary Modules are added inside your `Makefile` additionally make sure you flash the correct verion onto the correct board (otherwise the addresses dont match). 
+Then make sure all the necessary modules are added inside your `Makefile`. Additionally, make sure you flash the correct version onto the correct board (otherwise the addresses won't match). 
 
 

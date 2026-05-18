@@ -5,11 +5,14 @@ import LedController from "./LedController.lf"
 main reactor {
   led = new LedController();
   
-  timer t(10msec, 500msec)
-    
   /*
-    ========================= TODO ===========================
-    Here use the led.state_state to initialize the LED and the another 
-    reaction to toggle the LED every periodically.
+    Task: Add a timer here.
+  */
+  reaction(startup) -> led.set_state {=
+    lf_set(led.set_state, true);
+  =}
+
+  /*
+    Task: Add a reaction that is triggered by the timer and toggles the led.toggle port.
   */
 }

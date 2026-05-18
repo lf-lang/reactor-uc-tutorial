@@ -4,14 +4,17 @@ import LedController from "./LedController.lf"
 import LSM6DS33 from "./LSM6DS33.lf"
 
 preamble {=
-  #define ORIENTATION_TO_TIME 12566.0f
-  #define OFFSET_ANGLE 12.566f // 2 * pi, to avoid division by zero
+  #define ROTATION_TO_TIME 20.0f
+  #define BASE_BLINKING_PERIOD 1500
+  #define MIN_BLINKING_PERIOD 50
+
+  #define MAX(a,b) ((a) > (b) ? (a) : (b))
 =}
 
 main reactor {
   led = new LedController();
   lsm6ds33 = new LSM6DS33();
-  
+
   logical action blink: int;
   state blinking_speed: interval_t;
 
@@ -21,20 +24,16 @@ main reactor {
     lf_schedule(blink, SEC(1), 0);
   =}
 
-  /* 
-   ========================= TODO ===========================
-   Here read the orientation data from the LSM6DS33 and calculate the new blinking speed.
-   Find the equation to do this inside the README.md please use the ORIENTATION_TO_TIME 
-   and OFFSET_ANGLE macros defined in the preamble to calculate the blinking speed. 
-   Finally, set the blinking_speed state variable to the new value.
-  */
+  reaction(lsm6ds33.orientation) {=
+    float total_angle_x = lsm6ds33.orientation->value.x;
+    printf("total angle x: %.6f\n", total_angle_x);
+    uint32_t time_speed_up = MAX((ROTATION_TO_TIME * total_angle_x) + BASE_BLINKING_PERIOD, MIN_BLINKING_PERIOD);
+    printf("time delay: %li\n", time_speed_up);
+    self->blinking_speed = MSEC(time_speed_up);
+  =}
 
-
-  /* 
-    ========================= TODO ===========================
-    Here implement the reaction to the blink action. Toggle the LED and then reschedule
-    the next blink action using the blinking_speed state variable. 
-    Optionally check if the blinking_speed is zero and set it to a default value 
-    to avoid rescheduling with zero delay.
+  /*
+    Task: Add a reaction that gets triggered based on the `self->blinking_speed` period.
+    Use the logical action blink for this. This reaction should also toggle the LED.
   */
 }

@@ -207,7 +207,9 @@ Modify `src/LedController.lf` — a reactor that controls the on-board LED.
 
 > **Lingua Franca docs:** [lf-lang.org/docs](https://www.lf-lang.org/docs/)
 
-**Task:** Finish the `LedController` reactor by adding an input port `toggle` that triggers a reaction that toggles the on-board LED.
+**Task 1:** Add an input port named `toggle`.
+
+**Task 2:** Implement a reaction that reacts on the `toggle` input port. This reaction should check the state variable `self->num` to toggle either LED 0 or LED 1.
 
 Use the RIOT macros from `led.h`: `LED0_TOGGLE` and `LED1_TOGGLE`
 
@@ -221,23 +223,11 @@ You can import reactor from other files like this:
 import LedController from "./LedController.lf"
 ```
 
-**Task:**
+The file already imports and instantiates the `LedController` as `led`, and includes a `startup` reaction that sets the LED on initially.
 
-1. Import `LedController` from `./LedController.lf`
-2. Instantiate it as `led`
-3. Add a timer `t` with 10ms offset and 500ms period
-4. Add a `startup` reaction that sets the LED on initially
-5. Add a timer reaction that toggles the LED
+**Task 1:** Add a timer.
 
-```lf
-target uC
-
-import LedController from "./LedController.lf"
-
-main reactor {
-  // TODO: instantiate led, add timer, add reactions
-}
-```
+**Task 2:** Add a reaction that is triggered by the timer and toggles the `led.toggle` port.
 
 | Flashing Procedure | LF Diagram |
 |--------------------| ------------ |
@@ -272,15 +262,15 @@ make LF_MAIN=Sensor BOARD=adafruit-feather-nrf52840-sense all flash term
 
 ### 4.3. Using Sensor Values
 
-Make the LED blink faster or slower based on the device's orientation. When flat on a table (angle ≈ 0), use a 1-second LED toggle period. 
+Make the LED blink faster or slower based on the device's orientation. When flat on a table (angle ≈ 0), use a 1-second LED toggle period.
 
 ```
-OFFSET = 4 * PI ~ 12.566
-ORIENTATION_TO_TIME = 4 * PI * 1000 ~ 12566
-PERIOD = ORIENTATION_TO_TIME / (current_angle + OFFSET)
+uint32_t time_speed_up = MAX(ROTATION_TO_TIME * total_angle_x) + BASE_BLINKING_PERIOD, MIN_BLINKING_PERIOD);
 ```
 
 This produces our `PERIOD` in milliseconds.
+
+**Task:** Add a reaction that gets triggered based on the `self->blinking_speed` period. Use the logical action `blink` for this. This reaction should also toggle the LED.
 
 ![sensor](./assets/sensor.gif)
 

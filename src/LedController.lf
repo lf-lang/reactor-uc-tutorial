@@ -4,14 +4,32 @@ preamble {=
   #include "led.h"
 =}
 
-reactor LedController {
-  input toggle: int;
+reactor LedController(num: int = 0) {
   input set_state: bool;
+  /*
+  Task: add an input port named toggle
+  */
+
+  reaction (set_state) {=
+    if (set_state->value) {
+      if (self->num == 0) {
+        LED0_ON;
+      } else {
+        LED1_ON;
+      } 
+    } else {
+      if (self->num == 0) {
+        LED0_OFF;
+      } else {
+        LED1_OFF;
+      } 
+    }
+  =}
 
   /*
-    ========================= TODO ===========================
-    Implement the reactions to toggle and set_state. You can use the 
-    functions defined in led.h, e.g., LED0_TOGGLE, LED0_ON, LED0_OFF
+    Task: Implement a reaction that reacts on an input port named toggle.
+    This reaction should check the state variable `self->num` to either toggle
+    LED 0 or LED 1.
   */
 }
 

@@ -10,14 +10,15 @@ struct Vector {
 typedef struct Vector Vector;
 
 #include "periph/i2c.h"
+#include "ztimer.h"
 
 /* I2C Configuration */
 #define I2C_BUS         I2C_DEV(0)      // Usually I2C_DEV(0) in RIOT
 
-// Sadly, three version of the sensor have different addresses: DS33/DS3/DSOX
-#define SENSOR_ADDR1     0x69
-#define SENSOR_ADDR2     0x6A
-#define SENSOR_ADDR3     0x6C
+/* WHO_AM_I register expected values for different sensor variants */
+#define WHO_AM_I_DS33    0x69    // LSM6DS33
+#define WHO_AM_I_DS3     0x6A    // LSM6DS3 / LSM6DS3TR-C (used on newer Bluefruit Feather)
+#define WHO_AM_I_DSOX    0x6C    // LSM6DSOX
 
 #define I2C_FLAG_NONE   0
 
@@ -30,7 +31,7 @@ typedef struct Vector Vector;
 #define OUTX_L_XL       0x28            // Accel starts here
 
 #define GYRO_OUTX_L         0x22    // Starting register for Gyro data
-#define GYRO_SENSITIVITY    6.75f   // mdps/LSB for +/- 245 dps range
+#define GYRO_SENSITIVITY    8.75f   // mdps/LSB for +/- 245 dps range (per datasheet)
 #define DT                  0.0048f // 1 / 208Hz ODR = 0.0048 seconds
 #define CALIBRATION_SAMPLES 200
 =}
@@ -38,7 +39,7 @@ typedef struct Vector Vector;
 reactor LSM6DS33 {
   //output acceleration: Vector
   output orientation: Vector
-  timer t(50msec, 48msec);
+  timer t(50msec, 150msec);//48msec);
 
   state angle_x: float;
   state angle_y: float;
@@ -64,13 +65,15 @@ reactor LSM6DS33 {
     i2c_acquire(I2C_BUS);
 
     // 2. Verify connection (WHO_AM_I)
+    /* I2C addresses: 0x6A (SA0 low) or 0x6B (SA0 high) - Bluefruit Feather uses 0x6A */
     uint8_t addrs[] = {0x6A, 0x6B};
     int found = 0;
 
     for (int i = 0; i < 2; i++) {
       if (i2c_read_reg(I2C_BUS, addrs[i], WHO_AM_I, &whoami, I2C_FLAG_NONE) >= 0) {
-        if (whoami == SENSOR_ADDR1 || whoami == SENSOR_ADDR2 || whoami == SENSOR_ADDR2) { // DS33/DS3/DSOX variants
+        if (whoami == WHO_AM_I_DS33 || whoami == WHO_AM_I_DS3 || whoami == WHO_AM_I_DSOX) {
           self->sensor_addr = addrs[i];
+          printf("found sensor at address: 0x%02X (WHO_AM_I: 0x%02X)\n", self->sensor_addr, whoami);
           found = 1;
           break;
         }
@@ -83,8 +86,13 @@ reactor LSM6DS33 {
     }
 
     // 3. Software Reset
-    i2c_write_reg(I2C_BUS, self->sensor_addr, CTRL3_C, 0x05, I2C_FLAG_NONE);
-    
+    i2c_write_reg(I2C_BUS, self->sensor_addr, CTRL3_C, 0x01, I2C_FLAG_NONE);
+
+    // Wait for reset to complete (sensor needs time after software reset)
+    i2c_release(I2C_BUS);
+    ztimer_sleep(ZTIMER_SEC, 1);
+    i2c_acquire(I2C_BUS);
+
     // 4. Configure Accel (208 Hz, +/- 2g)
     i2c_write_reg(I2C_BUS, self->sensor_addr, CTRL1_XL, 0x40, I2C_FLAG_NONE);
 
@@ -102,13 +110,14 @@ reactor LSM6DS33 {
   reaction(t) -> orientation {=
     uint8_t buf[6];
     int16_t raw_x, raw_y, raw_z;
-
-
-    /*
-      ========================= TODO ===========================
-      Here check the RIOT manual and acquire the I2C bus, read the 
-      6 gyro data bytes, and finally release the bus
-    */
+    
+    i2c_acquire(I2C_BUS);
+    if (i2c_read_regs(I2C_BUS, self->sensor_addr, GYRO_OUTX_L, buf, 6, I2C_FLAG_NONE) < 0) {
+      i2c_release(I2C_BUS);
+      printf("failed to read gyro data\n");
+      return;
+    }
+    i2c_release(I2C_BUS);
 
     // Reconstruct 16-bit signed integers (Little Endian)
     raw_x = (int16_t)(buf[0] | (buf[1] << 8));

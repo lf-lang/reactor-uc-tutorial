@@ -23,6 +23,7 @@ This is a tutorial for Lingua Franca applications running on RIOT OS with the [A
 | **Linux** (Ubuntu/Debian) | Fully supported (recommended) |
 | **NixOS / Nix** | Fully supported |
 | **macOS** | Supported with caveats |
+| **Windows / WSL** | Supported with flashing caveats |
 
 > **Note:** For detailed RIOT OS setup instructions, see the official [RIOT Getting Started Guide](https://doc.riot-os.org/getting-started.html).
 
@@ -103,6 +104,30 @@ brew install --cask gcc-arm-embedded
 > ```
 
 > **Important:** On macOS, `make` is installed as `gmake`. Use `gmake` instead of `make` in all commands below.
+
+#### 1.3.4. Windows Subsystem for Linux (WSL)
+
+WSL can use the same Linux package setup as Ubuntu/Debian. In addition, install the Python packages required by the RIOT terminal and the Adafruit flashing tool:
+
+```bash
+pip install psutil adafruit-nrfutil
+```
+
+WSL does not automatically expose USB serial devices from Windows. Before using a board from WSL, share and attach the device from Windows PowerShell with `usbipd-win`. Follow the [Microsoft WSL USB guide](https://learn.microsoft.com/en-us/windows/wsl/connect-usb) for the full setup.
+
+Typical PowerShell commands are:
+
+```powershell
+usbipd list
+usbipd bind --busid <BUSID>
+usbipd attach --wsl --busid <BUSID>
+```
+
+After attaching the board, verify the serial device from WSL and use the detected device path as the `PORT` value:
+
+```bash
+ls /dev/ttyACM*
+```
 
 ### 1.4. Verify Your Setup
 
@@ -245,6 +270,7 @@ Add the following lines to your Makefile to enable I2C support in RIOT:
 # so i2c and printf support for floats is compiled into the riot kernel
 USEMODULE += periph_i2c
 USEMODULE += printf_float
+USEMODULE += ztimer_sec
 ```
 
 ### 4.2. Implementing the Sensor
@@ -260,7 +286,27 @@ To test your sensor implementation, compile and run `Sensor.lf` (which includes 
 make LF_MAIN=Sensor BOARD=adafruit-feather-nrf52840-sense all flash term
 ```
 
-### 4.3. Using Sensor Values
+If you are using WSL, use the explicit flashing and terminal commands in the next section.
+
+### 4.3. WSL Flashing & Troubleshooting
+
+When using Windows Subsystem for Linux (WSL) with the Adafruit Feather nRF52840 Sense, the normal RIOT build flow can be used for compilation, but flashing may require the Adafruit bootloader workflow.
+
+Before flashing from WSL, make sure the board's USB serial device has been shared from Windows PowerShell and attached to WSL as described in the setup section. Then put the board into bootloader mode manually. The board should enumerate as a serial device such as `/dev/ttyACM0`.
+
+Then use this command to flash the firmware using the Adafruit nRF Util tool:
+
+```bash
+make LF_MAIN=Sensor BOARD=adafruit-feather-nrf52840-sense PROGRAMMER=adafruit-nrfutil PORT=/dev/ttyACM0 flash
+```
+
+After flashing, open the serial monitor with:
+
+```bash
+make LF_MAIN=Sensor BOARD=adafruit-feather-nrf52840-sense PORT=/dev/ttyACM0 term
+```
+
+### 4.4. Using Sensor Values
 
 Make the LED blink faster or slower based on the device's orientation. When flat on a table (angle ≈ 0), use a 1-second LED toggle period.
 
@@ -371,5 +417,3 @@ Open the the `src/FederatedBlinking.lf` file now we want to combine everything l
 here we want to let the local Blink faster if neighbors microcontroller is turned.
 
 Then make sure all the necessary modules are added inside your `Makefile`. Additionally, make sure you flash the correct version onto the correct board (otherwise the addresses won't match). 
-
-

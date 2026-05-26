@@ -33,13 +33,13 @@ typedef struct Vector Vector;
 #define GYRO_OUTX_L         0x22    // Starting register for Gyro data
 #define GYRO_SENSITIVITY    8.75f   // mdps/LSB for +/- 245 dps range (per datasheet)
 #define DT                  0.0048f // 1 / 208Hz ODR = 0.0048 seconds
-#define CALIBRATION_SAMPLES 200
+#define CALIBRATION_SAMPLES 10
 =}
 
-reactor LSM6DS33 {
+reactor LSM6DS33(period=150ms) {
   //output acceleration: Vector
   output orientation: Vector
-  timer t(50msec, 150msec);//48msec);
+  timer t(50msec, period);//48msec);
 
   state angle_x: float;
   state angle_y: float;

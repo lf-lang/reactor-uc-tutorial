@@ -27,6 +27,6 @@ main reactor {
     source = new HighFrequencySource();
     sink = new DataSink();
 
-    @buffer(5)
+    @buffer(1)
     source.out -> sink.in after 500msec;
 }

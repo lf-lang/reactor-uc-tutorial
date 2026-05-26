@@ -2,7 +2,7 @@ target uC
 
 import LedController from "./LedController.lf"
 
-reactor Src(id: int = 0) {
+reactor Src {
   output out: int
 
   led = new LedController();
@@ -10,7 +10,7 @@ reactor Src(id: int = 0) {
   timer t(10msec, 2sec);
   reaction(t) -> out, led.toggle {=
     printf("Hello from Src!\n");
-    lf_set(out, self->id);
+    lf_set(out, 42);
     lf_set(led.toggle, 42);
   =}
 }
@@ -31,13 +31,12 @@ reactor Dst {
 }
 
 federated reactor {
-  // black
-  @interface_coap(name="if1", address="fe80::e46b:69f7:d00d:2a31")
-  r1 = new Src(id=42)
+  @interface_coap(name="if1", address="<TODO>")
+  r1 = new Src()
   
-  // blue
-  @interface_coap(name="if1", address="fe80::6481:c8fa:8443:8e02")
-  r2 = new Dst()
+  /*
+    Task: Instantiate the Dst reactor as a federate and configure the IP address
+  */
 
   @link(left="if1", right="if1")
   r1.out -> r2.in after 1s;

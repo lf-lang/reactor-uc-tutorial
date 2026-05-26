@@ -129,7 +129,13 @@ After attaching the board, verify the serial device from WSL and use the detecte
 ls /dev/ttyACM*
 ```
 
-### 1.4. Verify Your Setup
+
+### 1.4. VSCode
+
+If you have VSCode installed, you can search for the Lingua-Franca extension, for live diagram synthesis and syntax highlighting.
+
+
+### 1.5. Verify Your Setup
 
 Check that the required tools are available:
 
@@ -144,9 +150,9 @@ java -version
 make --version   # or gmake --version on macOS
 ```
 
-### 1.5. Initialize the Repository
+### 1.6. Initialize the Repository
 
-The RIOT OS sources are provided as a submodule of the repository. Fetch them with:
+The RIOT OS sources are provided as a submodule of the repository. Fetch them with, if you have not done it yet.
 
 ```bash
 cd reactor-uc-tutorial
@@ -384,7 +390,7 @@ You need to tell reactor-uc to add the COAP network channel to the compilation u
 CFLAGS += -DNETWORK_CHANNEL_COAP_RIOT
 ```
 
-In reactor-uc, configure the network channels by adding annotations:
+In reactor-uc, configure the network channels by adding annotations and adding the missing federate.
 
 ```
 @interface_coap(name="if1", address="<Paste Your Link Local Address Here>")

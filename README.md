@@ -36,7 +36,7 @@ This is a tutorial for Lingua Franca applications running on RIOT OS with the [A
 git clone https://github.com/lf-lang/reactor-uc.git --recurse-submodules
 
 # Or clone via SSH
-git clone git@github.com:lf-lang/reactor-uc.git --recurse-submodules
+git clone https://github.com/lf-lang/reactor-uc.git --recurse-submodules
 
 # Set the environment variable (add to ~/.bashrc for persistence)
 export REACTOR_UC_PATH=$(pwd)/reactor-uc
@@ -155,9 +155,45 @@ git submodule update --init --recursive
 
 ---
 
-## Part 2: Getting Started
+## Part 2: Simple LF Program
 
-### 2.1. Configure the Makefile
+### 2.1. LedController Reactor
+
+Modify `src/LedController.lf` — a reactor that controls the on-board LED.
+
+> **Lingua Franca docs:** [lf-lang.org/docs](https://www.lf-lang.org/docs/)
+
+**Task:** Add an input port named `toggle`.
+
+**Task:** Implement a reaction that reacts on the `toggle` input port. This reaction should check the state variable `self->num` to toggle either LED 0 or LED 1.
+
+Use the RIOT macros from `led.h`: `LED0_TOGGLE` and `LED1_TOGGLE`
+
+### 2.2. HelloUc: Using the LedController
+
+Edit `src/HelloUc.lf` to use your `LedController` with a periodic timer.
+
+You can import reactor from other files like this:
+
+```
+import LedController from "./LedController.lf"
+```
+
+The file already imports and instantiates the `LedController` as `led`, and includes a `startup` reaction that sets the LED on initially.
+
+**Task:** Add a timer.
+
+**Task:** Add a reaction that is triggered by the timer and toggles the `led.toggle` port.
+
+At the end the diagram of your program should look something like this:
+
+![blink_diagram](./assets/HelloUc.svg)
+
+---
+
+## Part 3: Compiling and Flashing
+
+### 3.1. Configure the Makefile
 
 The repository has a `Makefile` that governs the build. By default, it compiles the LF program in `src/HelloUc.lf`. To compile a different program, edit the `Makefile` to set `LF_MAIN` to your program and `BOARD` to your board.
 
@@ -172,7 +208,7 @@ Alternatively, you can override the board on the command line. For example:
 make LF_MAIN=HelloUc all
 ```
 
-### 2.2. Build
+### 3.2. Build
 
 ```bash
 make all
@@ -184,7 +220,7 @@ Or override the Makefile configuration with parameters:
 make LF_MAIN=HelloUc BOARD=adafruit-feather-nrf52840-sense all
 ```
 
-### 2.3. Flash the Program onto Your Board
+### 3.3. Flash the Program onto Your Board
 
 ![flashing](./assets/compile-and-flash.gif)
 
@@ -198,7 +234,9 @@ Or override the Makefile configuration with parameters:
 make LF_MAIN=HelloUc BOARD=adafruit-feather-nrf52840-sense flash
 ```
 
-### 2.4. Open a Terminal
+![flash_and_blinking](./assets/flashing_blinking.gif)
+
+### 3.4. Open a Terminal
 
 You can open a terminal that interacts with stdin and stdout of your program as follows:
 
@@ -221,42 +259,6 @@ CFLAGS += -DLF_LOG_LEVEL_ALL=LF_LOG_LEVEL_DEBUG
 ```
 
 ![debug](./assets/enable-debugging-logging.gif)
-
----
-
-## Part 3: Basic Tutorial
-
-### 3.1. LedController Reactor
-
-Modify `src/LedController.lf` — a reactor that controls the on-board LED.
-
-> **Lingua Franca docs:** [lf-lang.org/docs](https://www.lf-lang.org/docs/)
-
-**Task:** Add an input port named `toggle`.
-
-**Task:** Implement a reaction that reacts on the `toggle` input port. This reaction should check the state variable `self->num` to toggle either LED 0 or LED 1.
-
-Use the RIOT macros from `led.h`: `LED0_TOGGLE` and `LED1_TOGGLE`
-
-### 3.2. HelloUc: Using the LedController
-
-Edit `src/HelloUc.lf` to use your `LedController` with a periodic timer.
-
-You can import reactor from other files like this:
-
-```
-import LedController from "./LedController.lf"
-```
-
-The file already imports and instantiates the `LedController` as `led`, and includes a `startup` reaction that sets the LED on initially.
-
-**Task:** Add a timer.
-
-**Task:** Add a reaction that is triggered by the timer and toggles the `led.toggle` port.
-
-| Flashing Procedure | LF Diagram |
-|--------------------| ------------ |
-|![flash_and_blinking](./assets/flashing_blinking.gif) | ![blink_diagram](./assets/HelloUc.svg)
 
 ---
 
@@ -322,7 +324,7 @@ This produces our `PERIOD` in milliseconds.
 
 Flash the program and rotate the device around its longest axis to see the LED blink rate change. See the video below.
 
-| Flashing Procedure | LF Diagram |
+| Rotating Sensor | LF Diagram |
 |--------------------| ------------ |
 |![flash_and_blinking](./assets/sensor_rotating.gif) | ![blink_diagram](./assets/Sensor.svg)
 
@@ -403,7 +405,7 @@ make LF_MAIN=SimpleCoapFederated LF_FED=r2 BOARD=adafruit-feather-nrf52840-sense
 If successful, you should see in the serial output that the two federates are communicating.
 
 
-| Flashing Procedure | LF Diagram |
+| Distributed Blinking | LF Diagram |
 |--------------------| ------------ |
 |![flash_and_blinking](./assets/simple_federated.gif) | ![blink_diagram](./assets/SimpleCoapFederated.svg)
 

@@ -10,7 +10,7 @@
 
 ______
 
-This is a tutorial for Lingua Franca applications running on RIOT OS with the [Adafruit Feather Sense](https://learn.adafruit.com/adafruit-feather-sense) board. It uses [reactor-uc](https://github.com/lf-lang/reactor-uc), the "micro C" target for Lingua Franca.
+This is a tutorial for micro-LF applications running on RIOT OS with the [Adafruit Feather Sense](https://learn.adafruit.com/adafruit-feather-sense) board. It uses [micro-LF](https://github.com/lf-lang/reactor-uc), the embedded C dialect of Lingua Franca.
 
 ---
 
@@ -165,7 +165,7 @@ git submodule update --init --recursive
 
 ### 2.1. LedController Reactor
 
-Modify `src/LedController.lf` — a reactor that controls the on-board LED.
+Modify `src/LedController.ulf` — a reactor that controls the on-board LED.
 
 > **Lingua Franca docs:** [lf-lang.org/docs](https://www.lf-lang.org/docs/)
 
@@ -177,12 +177,12 @@ Use the RIOT macros from `led.h`: `LED0_TOGGLE` and `LED1_TOGGLE`
 
 ### 2.2. HelloUc: Using the LedController
 
-Edit `src/HelloUc.lf` to use your `LedController` with a periodic timer.
+Edit `src/HelloUc.ulf` to use your `LedController` with a periodic timer.
 
 You can import reactor from other files like this:
 
 ```
-import LedController from "./LedController.lf"
+import LedController from "./LedController.ulf"
 ```
 
 The file already imports and instantiates the `LedController` as `led`, and includes a `startup` reaction that sets the LED on initially.
@@ -201,7 +201,7 @@ At the end the diagram of your program should look something like this:
 
 ### 3.1. Configure the Makefile
 
-The repository has a `Makefile` that governs the build. By default, it compiles the LF program in `src/HelloUc.lf`. To compile a different program, edit the `Makefile` to set `LF_MAIN` to your program and `BOARD` to your board.
+The repository has a `Makefile` that governs the build. By default, it compiles the micro-LF program in `src/HelloUc.ulf`. To compile a different program, edit the `Makefile` to set `LF_MAIN` to your program and `BOARD` to your board.
 
 ```Makefile
 LF_MAIN ?= HelloUc
@@ -252,7 +252,7 @@ make term
 
 This will display any output your program generates using, for example, `printf`.
 
-You can also get debug output from the `reactor-uc` runtime by changing the following line in the `Makefile`:
+You can also get debug output from the micro-LF runtime by changing the following line in the `Makefile`:
 
 ```
 CFLAGS += -DLF_LOG_LEVEL_ALL=LF_LOG_LEVEL_ERROR
@@ -285,9 +285,9 @@ USEMODULE += ztimer_sec
 
 The Adafruit Feather Sense includes many sensors. We'll focus on the [LSM6DS33](https://www.pololu.com/file/0J1087/LSM6DS33.pdf) accelerometer and gyro. See the [full sensor list](https://learn.adafruit.com/adafruit-feather-sense) for details.
 
-The file `LSM6DS33.lf` has a section for reading sensor values that you need to complete. Refer to the [RIOT I2C documentation](https://api.riot-os.org/group__drivers__periph__i2c.html) and read register `OUTX_L_G` (see the datasheet for details).
+The file `LSM6DS33.ulf` has a section for reading sensor values that you need to complete. Refer to the [RIOT I2C documentation](https://api.riot-os.org/group__drivers__periph__i2c.html) and read register `OUTX_L_G` (see the datasheet for details).
 
-To test your sensor implementation, compile and run `Sensor.lf` (which includes the sensor reactor). This command compiles, flashes, and opens the serial console:
+To test your sensor implementation, compile and run `Sensor.ulf` (which includes the sensor reactor). This command compiles, flashes, and opens the serial console:
 
 
 ```bash
@@ -340,7 +340,7 @@ Flash the program and rotate the device around its longest axis to see the LED b
 
 ### 5.1. Annotations
 
-reactor-uc supports many annotations; see the [full list](http://micro-lf.org/documentation/annotations/). In this scenario, we'll add a `timeout` and configure a buffer size for actions.
+micro-LF supports many annotations; see the [full list](http://micro-lf.org/documentation/annotations/). In this scenario, we'll add a `timeout` and configure a buffer size for actions.
 
 - **Timeout:** add the `@timeout(<time_value>)` annotation to the main reactor.
 - **Action Buffer Size:** add the `@max_pending_event(<number>)` before the action declaration.
@@ -355,7 +355,7 @@ The timeout property can be found inside the `src-gen/Sensor/lf_start.c` file in
 
 Before we go federated it is good to look into the `@buffer` annotation, which can be added to delayed connections to increase the associated buffer for storing the values. If you have a timer with a high frequency it is very easy to run out of space inside the connection.
 
-**Task:** The `DelayedConn.lf` program has a high-frequency source (1ms timer) with a 500ms delayed connection. Experiment with different `@buffer` values to find the minimum buffer size that prevents dropped values.
+**Task:** The `DelayedConn.ulf` program has a high-frequency source (1ms timer) with a 500ms delayed connection. Experiment with different `@buffer` values to find the minimum buffer size that prevents dropped values.
 
 Compile and Flash your program, then observe the output and adjust the `@buffer` annotation until no values are dropped.
 
@@ -378,7 +378,7 @@ USEMODULE += auto_init_gnrc_netif
 USEMODULE += auto_init
 ```
 
-Then compile and run the `src/Ipv6LinkLocal.lf` program. This program will print the IPv6 Link Local address of this board. Copy and save this address.
+Then compile and run the `src/Ipv6LinkLocal.ulf` program. This program will print the IPv6 Link Local address of this board. Copy and save this address.
 
 ![ipv6](./assets/ipv6-link-local.gif)
 
@@ -390,7 +390,7 @@ You need to tell reactor-uc to add the COAP network channel to the compilation u
 CFLAGS += -DNETWORK_CHANNEL_COAP_RIOT
 ```
 
-In reactor-uc, configure the network channels by adding annotations and adding the missing federate.
+In micro-LF, configure the network channels by adding annotations and adding the missing federate.
 
 ```
 @interface_coap(name="if1", address="<Paste Your Link Local Address Here>")
@@ -421,7 +421,7 @@ If successful, you should see in the serial output that the two federates are co
 
 You made it to the final level.
 
-Open the the `src/FederatedBlinking.lf` file now we want to combine everything learned and
+Open the the `src/FederatedBlinking.ulf` file now we want to combine everything learned and
 here we want to let the local Blink faster if neighbors microcontroller is turned.
 
 Then make sure all the necessary modules are added inside your `Makefile`. Additionally, make sure you flash the correct version onto the correct board (otherwise the addresses won't match). 

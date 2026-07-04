@@ -1,7 +1,6 @@
-target uC
 
-import LedController from "./LedController.lf"
-import LSM6DS33 from "./LSM6DS33.lf"
+import LedController from "./LedController.ulf"
+import LSM6DS33 from "./LSM6DS33.ulf"
 
 preamble {=
   #define ROTATION_TO_TIME 20.0f

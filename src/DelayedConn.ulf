@@ -1,11 +1,10 @@
-target uC;
 
 reactor HighFrequencySource {
     output out: int;
-    timer t(1msec);
+    timer t(1msec, 1msec);
     state counter: int = 0;
     
-    reaction(t) {=
+    reaction(t) -> out {=
         lf_set(out, self->counter++);
     =}
 }
@@ -27,6 +26,6 @@ main reactor {
     source = new HighFrequencySource();
     sink = new DataSink();
 
-    @buffer(1)
+    @buffer(500)
     source.out -> sink.in after 500msec;
 }

@@ -1,6 +1,5 @@
-target uC
 
-import LedController from "./LedController.lf"
+import LedController from "./LedController.ulf"
 
 main reactor {
   led = new LedController();

@@ -1,6 +1,5 @@
-target uC
 
-import LedController from "./LedController.lf"
+import LedController from "./LedController.ulf"
 
 reactor Src(id: int = 0) {
   output out: int

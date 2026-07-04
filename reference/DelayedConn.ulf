@@ -1,4 +1,3 @@
-target uC;
 
 reactor HighFrequencySource {
     output out: int;

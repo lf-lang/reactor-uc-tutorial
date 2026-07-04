@@ -1,7 +1,6 @@
-target uC
 
-import LedController from "./LedController.lf"
-import LSM6DS33 from "./LSM6DS33.lf"
+import LedController from "./LedController.ulf"
+import LSM6DS33 from "./LSM6DS33.ulf"
 
 preamble {=
   #define ROTATION_TO_TIME 20.0f
@@ -11,12 +10,26 @@ preamble {=
   #define MAX(a,b) ((a) > (b) ? (a) : (b))
 =}
 
-main reactor {
-  led = new LedController();
+reactor SensorReactor {
   lsm6ds33 = new LSM6DS33();
+  led = new LedController();
+  
+  output orientation: Vector;
+  timer t(0sec, 500ms);
+
+  reaction(t) -> led.toggle {=
+    lf_set(led.toggle, 0);
+  =}
+
+  lsm6ds33.orientation -> orientation;
+}
+
+reactor BlinkingReactor {
+  led = new LedController();
 
   logical action blink: int;
   state blinking_speed: interval_t;
+  input orientation: Vector;
 
   reaction(startup) -> led.set_state, blink {=
     lf_set(led.set_state, true);
@@ -24,7 +37,7 @@ main reactor {
     lf_schedule(blink, SEC(1), 0);
   =}
 
-  reaction(lsm6ds33.orientation) {=
+  reaction(orientation) {=
     float total_angle_x = lsm6ds33.orientation->value.x;
     printf("total angle x: %.6f\n", total_angle_x);
     uint32_t time_speed_up = MAX((ROTATION_TO_TIME * total_angle_x) + BASE_BLINKING_PERIOD, MIN_BLINKING_PERIOD);
@@ -36,4 +49,15 @@ main reactor {
     lf_set(led.toggle, 0);
     lf_schedule(blink, self->blinking_speed, 0);
   =}
+}
+
+federated reactor {
+  @interface_coap(name="if1", address="fe80::e46b:69f7:d00d:2a31")
+  sensor = new SensorReactor()
+
+  @interface_coap(name="if1", address="fe80::6481:c8fa:8443:8e02")
+  blinking = new BlinkingReactor()
+
+  @link(left="if1", right="if1")
+  sensor.orientation -> blinking.orientation after 10ms;
 }

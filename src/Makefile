@@ -1,5 +1,5 @@
-# The name of the LF application inside "./src" to build/run/flash etc.
-LF_MAIN ?= HelloUc
+# The name of the micro-LF application inside "./src" to build/run/flash etc.
+ULF_MAIN ?= HelloUc
 
 # Add modules used by the LF application
 USEMODULE += periph_i2c

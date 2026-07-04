@@ -1,7 +1,6 @@
-target uC
 
-import LedController from "./LedController.lf"
-import LSM6DS33 from "./LSM6DS33.lf"
+import LedController from "./LedController.ulf"
+import LSM6DS33 from "./LSM6DS33.ulf"
 
 preamble {=
   #define ROTATION_TO_TIME 20.0f
@@ -12,17 +11,16 @@ preamble {=
 =}
 
 reactor SensorReactor {
-  lsm6ds33 = new LSM6DS33();
+  lsm6ds33 = new LSM6DS33(period=500ms);
   led = new LedController();
   
-  output orientation: Vector;
+  output orientation: float;
   timer t(0sec, 500ms);
 
-  reaction(t) -> led.toggle {=
+  reaction(t) -> led.toggle, orientation {=
     lf_set(led.toggle, 0);
+    lf_set(orientation, 1.5);
   =}
-
-  lsm6ds33.orientation -> orientation;
 }
 
 reactor BlinkingReactor {
@@ -30,7 +28,7 @@ reactor BlinkingReactor {
 
   logical action blink: int;
   state blinking_speed: interval_t;
-  input orientation: Vector;
+  input orientation: float;
 
   reaction(startup) -> led.set_state, blink {=
     lf_set(led.set_state, true);
@@ -39,7 +37,7 @@ reactor BlinkingReactor {
   =}
 
   reaction(orientation) {=
-    float total_angle_x = lsm6ds33.orientation->value.x;
+    float total_angle_x = orientation->value.x;
     printf("total angle x: %.6f\n", total_angle_x);
     uint32_t time_speed_up = MAX((ROTATION_TO_TIME * total_angle_x) + BASE_BLINKING_PERIOD, MIN_BLINKING_PERIOD);
     printf("time delay: %li\n", time_speed_up);
